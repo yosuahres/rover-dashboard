@@ -1,26 +1,52 @@
-<script setup>
-// No direct component imports needed here as they will be rendered via router-view
-</script>
-
 <template>
-  <nav>
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </nav>
-  <router-view />
+  <div class="min-h-screen w-full flex flex-col bg-gray-100">
+    <nav class="bg-white shadow-md p-4 flex items-center justify-between px-6">
+  <div class="flex flex-grow justify-between">
+        <router-link
+          to="/dashboard"
+          class="text-lg font-medium text-gray-700 hover:text-purple-600 relative px-2 pb-1 router-link w-32 flex flex-col items-center"
+          active-class="font-bold text-purple-600 after:content-[''] after:block after:w-24 after:h-1 after:bg-purple-600 after:rounded after:mt-1 after:transition-transform after:scale-x-100 after:origin-left"
+          exact-active-class="font-bold text-purple-600 after:scale-x-100"
+        >
+          Main
+        </router-link>
+        <router-link
+          to="/drive"
+          class="text-lg font-medium text-gray-700 hover:text-purple-600 relative px-2 pb-1 router-link w-32 flex flex-col items-center"
+          active-class="font-bold text-purple-600 after:content-[''] after:block after:w-24 after:h-1 after:bg-purple-600 after:rounded after:mt-1 after:transition-transform after:scale-x-100 after:origin-left"
+          exact-active-class="font-bold text-purple-600 after:scale-x-100"
+        >
+          Debug
+        </router-link>
+        <router-link
+          to="/pid_debug"
+          class="text-lg font-medium text-gray-700 hover:text-purple-600 relative px-2 pb-1 router-link w-32 flex flex-col items-center"
+          active-class="font-bold text-purple-600 after:content-[''] after:block after:w-24 after:h-1 after:bg-purple-600 after:rounded after:mt-1 after:transition-transform after:scale-x-100 after:origin-left"
+          exact-active-class="font-bold text-purple-600 after:scale-x-100"
+        >
+          Camera
+        </router-link>
+        <router-link
+          to="/science"
+          class="text-lg font-medium text-gray-700 hover:text-purple-600 relative px-2 pb-1 router-link w-32 flex flex-col items-center"
+          active-class="font-bold text-purple-600 after:content-[''] after:block after:w-24 after:h-1 after:bg-purple-600 after:rounded after:mt-1 after:transition-transform after:scale-x-100 after:origin-left"
+          exact-active-class="font-bold text-purple-600 after:scale-x-100"
+        >
+          Science
+        </router-link>
+        <router-link
+          to="/misc"
+          class="text-lg font-medium text-gray-700 hover:text-purple-600 relative px-2 pb-1 router-link w-32 flex flex-col items-center"
+          active-class="font-bold text-purple-600 after:content-[''] after:block after:w-24 after:h-1 after:bg-purple-600 after:rounded after:mt-1 after:transition-transform after:scale-x-100 after:origin-left"
+          exact-active-class="font-bold text-purple-600 after:scale-x-100"
+        >
+          Terminal
+        </router-link>
+      </div>
+      <button class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">
+        Disconnect
+      </button>
+    </nav>
+    <router-view class="flex-grow h-full" />
+  </div>
 </template>
-
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
-</style>
