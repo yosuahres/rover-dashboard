@@ -1,29 +1,29 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import MainView from '../views/MainView.vue';
-import DriveView from '../views/CamView.vue';
-import PIDDebugView from '../views/TerminalView.vue';
+import CameraView from '../views/CamView.vue';
+import DebugView from '../views/TerminalView.vue';
 import ScienceView from '../views/ScienceView.vue';
-import MiscView from '../views/DebugView.vue';
+import XXView from '../views/DebugView.vue';
 
 const routes = [
   {
     path: '/',
-    redirect: '/main',
+    redirect: '/data',
   },
   {
-    path: '/main',
-    name: 'Main',
+    path: '/data',
+    name: 'Data',
     component: MainView,
   },
   {
-    path: '/drive',
-    name: 'Drive',
-    component: DriveView,
+    path: '/camera',
+    name: 'Camera',
+    component: CameraView,
   },
   {
-    path: '/pid_debug',
-    name: 'PID_Debug',
-    component: PIDDebugView,
+    path: '/debug',
+    name: 'Debug',
+    component: DebugView,
   },
   {
     path: '/science',
@@ -31,9 +31,9 @@ const routes = [
     component: ScienceView,
   },
   {
-    path: '/misc',
-    name: 'Misc',
-    component: MiscView,
+    path: '/xx',
+    name: 'XX',
+    component: XXView,
   },
 ];
 
