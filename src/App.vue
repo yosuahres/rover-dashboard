@@ -56,10 +56,8 @@
 </template>
 
 <script setup>
-import { createROS, useROS } from './composables/useRos';
+import { useROS } from './composables/useRos';
 import ConnectionForm from './components/ConnectionForm.vue';
 
-// Initialize ROS context
-createROS();
 const { status } = useROS();
 </script>
