@@ -1,7 +1,7 @@
 import { ref, readonly, provide, inject } from 'vue';
 import ROSLIB from 'roslib';
 
-const ROS_KEY = Symbol('ros');
+export const ROS_KEY = Symbol('ros');
 
 export function createROS() {
   const ros = ref(null);
@@ -153,9 +153,8 @@ export function createROS() {
     updateNodes,
     subscribeToTopic,
     unsubscribeFromTopic,
+    ROS_KEY // Export ROS_KEY as part of rosState for app.provide in main.js
   };
-
-  provide(ROS_KEY, rosState);
 
   return rosState;
 }
