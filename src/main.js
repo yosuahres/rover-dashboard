@@ -10,5 +10,5 @@ const pinia = createPinia();
 
 app.use(pinia);
 app.use(router);
-createROS(); // Initialize ROS context
+createROS(); 
 app.mount("#app");

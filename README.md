@@ -12,7 +12,8 @@ pnpm install
 pnpm dev
 ```
 
-This will start a local development server, usually at `http://localhost:5173`.
+port 6969;   
+open localhost:6969;   
 
 ### Build for Production
 
