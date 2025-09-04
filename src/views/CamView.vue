@@ -7,6 +7,7 @@
       <VideoStreamCard cardTitle="Camera 4" />
       <VideoStreamCard cardTitle="Camera 5" />
       <VideoStreamCard cardTitle="Camera 6" />
+      <!-- !TOBECHANGE more to go if needed -->
     </div>
   </div>
 </template>

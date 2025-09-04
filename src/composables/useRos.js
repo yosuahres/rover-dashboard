@@ -1,52 +1,37 @@
-import { ref, readonly, provide, inject } from 'vue';
+import { readonly } from 'vue';
 import ROSLIB from 'roslib';
+import { useMainStore } from '../stores/store';
 
-export const ROS_KEY = Symbol('ros');
-
-export function createROS() {
-  const ros = ref(null);
-  const loading = ref(false);
-  const status = ref(null); // 'Connected' | 'Disconnected' | null
-  const message = ref(null);
-  const server = ref('');
-  const topics = ref(new Map()); // Map<string, string> for topicName -> topicType
-  const nodes = ref([]); // string[] for node names
-  const messages = ref(new Map()); // Map<string, any> for topicName -> latestMessage
-  const subscriptions = ref(new Map()); // Map<string, ROSLIB.Topic> for topicName -> subscriber
+export function useROS() {
+  const mainStore = useMainStore();
 
   function initializeROS(ip, port) {
     const url = `ws://${ip}:${port}`;
-    loading.value = true;
-    server.value = ip;
+    mainStore.setLoading(true);
+    mainStore.setServer(ip);
 
     const rosConnection = new ROSLIB.Ros({ url });
 
-    ros.value = rosConnection;
+    mainStore.setRos(rosConnection);
 
     rosConnection.on('connection', () => {
-      message.value = `Connected to ROS master: ${url}`;
-      loading.value = false;
-      status.value = 'Connected';
+      mainStore.setMessage(`Connected to ROS master: ${url}`);
+      mainStore.setLoading(false);
+      mainStore.setStatus('Connected');
     });
 
     rosConnection.on('error', (error) => {
-      message.value = `Error connecting to ROS: ${url} - ${error.message || error}`;
-      loading.value = false;
-      status.value = 'Disconnected';
+      mainStore.setMessage(`Error connecting to ROS: ${url} - ${error.message || error}`);
+      mainStore.setLoading(false);
+      mainStore.setStatus('Disconnected');
       console.error('ROS connection error:', error);
     });
 
     rosConnection.on('close', () => {
       console.log('ROS connection closed');
-      message.value = `Closed connection to ROS master: ${url}`;
-      loading.value = false;
-      status.value = 'Disconnected';
-      // Clear all subscriptions and data when connection closes
-      subscriptions.value.forEach(sub => sub.unsubscribe());
-      subscriptions.value.clear();
-      topics.value.clear();
-      nodes.value = [];
-      messages.value.clear();
+      mainStore.setMessage(`Closed connection to ROS master: ${url}`);
+      mainStore.setLoading(false);
+      mainStore.clearAllRosData();
     });
   }
 
@@ -60,8 +45,8 @@ export function createROS() {
   };
 
   function updateTopics() {
-    if (ros.value && ros.value.isConnected) {
-      ros.value.getTopics((result) => {
+    if (mainStore.ros && mainStore.isConnected) {
+      mainStore.ros.getTopics((result) => {
         const newMap = new Map();
         for (let i = 0; i < result.topics.length; i++) {
           const topicName = result.topics[i];
@@ -70,41 +55,41 @@ export function createROS() {
           newMap.set(topicName, result.types[i]);
         }
 
-        if (!areMapsEqual(topics.value, newMap)) {
-          topics.value = newMap;
-          message.value = `Found ${topics.value.size} topics.`;
+        if (!areMapsEqual(mainStore.topics, newMap)) {
+          mainStore.setTopics(newMap);
+          mainStore.setMessage(`Found ${mainStore.topics.size} topics.`);
         }
       }, (error) => {
-        message.value = `Error listing topics: ${error.message || error}`;
+        mainStore.setMessage(`Error listing topics: ${error.message || error}`);
         console.error('Error listing topics:', error);
       });
     } else {
-      message.value = 'ROS not connected. Cannot list topics.';
+      mainStore.setMessage('ROS not connected. Cannot list topics.');
     }
   }
 
   function updateNodes() {
-    if (ros.value && ros.value.isConnected) {
-      ros.value.getNodes((result) => {
-        if (JSON.stringify(nodes.value) !== JSON.stringify(result)) {
-          nodes.value = result;
-          message.value = `Found ${nodes.value.length} nodes.`;
+    if (mainStore.ros && mainStore.isConnected) {
+      mainStore.ros.getNodes((result) => {
+        if (JSON.stringify(mainStore.nodes) !== JSON.stringify(result)) {
+          mainStore.setNodes(result);
+          mainStore.setMessage(`Found ${mainStore.nodes.length} nodes.`);
         }
       }, (error) => {
-        message.value = `Error listing nodes: ${error.message || error}`;
+        mainStore.setMessage(`Error listing nodes: ${error.message || error}`);
         console.error('Error listing nodes:', error);
       });
     } else {
-      message.value = 'ROS not connected. Cannot list nodes.';
+      mainStore.setMessage('ROS not connected. Cannot list nodes.');
     }
   }
 
   function subscribeToTopic(topicName, topicType) {
-    if (!ros.value || !ros.value.isConnected) {
-      message.value = 'ROS not connected. Cannot subscribe.';
+    if (!mainStore.ros || !mainStore.isConnected) {
+      mainStore.setMessage('ROS not connected. Cannot subscribe.');
       return;
     }
-    if (subscriptions.value.has(topicName)) {
+    if (mainStore.subscriptions.has(topicName)) {
       // Already subscribed
       return;
     }
@@ -115,54 +100,39 @@ export function createROS() {
     }
 
     const subscriber = new ROSLIB.Topic({
-      ros: ros.value,
+      ros: mainStore.ros,
       name: topicName,
       messageType: topicType,
       throttle_rate: 100,
     });
 
     subscriber.subscribe((msg) => {
-      messages.value.set(topicName, msg);
+      mainStore.setMessages(topicName, msg);
     });
 
-    subscriptions.value.set(topicName, subscriber);
-    message.value = `Subscribed to topic: ${topicName}`;
+    mainStore.addSubscription(topicName, subscriber);
+    mainStore.setMessage(`Subscribed to topic: ${topicName}`);
   }
 
   function unsubscribeFromTopic(topicName) {
-    if (subscriptions.value.has(topicName)) {
-      const subscriber = subscriptions.value.get(topicName);
-      subscriber.unsubscribe();
-      subscriptions.value.delete(topicName);
-      messages.value.delete(topicName);
-      message.value = `Unsubscribed from topic: ${topicName}`;
-    }
+    mainStore.removeSubscription(topicName);
+    mainStore.setMessage(`Unsubscribed from topic: ${topicName}`);
   }
 
-  const rosState = {
-    ros: readonly(ros), // Expose the raw ros object for direct calls like getTopics/getNodes
-    loading: readonly(loading),
-    server: readonly(server),
-    status: readonly(status),
-    message: readonly(message),
-    topics: readonly(topics),
-    nodes: readonly(nodes),
-    messages: readonly(messages),
+  return {
+    ros: readonly(mainStore.ros),
+    loading: readonly(mainStore.loading),
+    server: readonly(mainStore.server),
+    status: readonly(mainStore.status),
+    message: readonly(mainStore.message),
+    topics: readonly(mainStore.topics),
+    nodes: readonly(mainStore.nodes),
+    messages: readonly(mainStore.messages),
+    isConnected: readonly(mainStore.isConnected),
     initializeROS,
     updateTopics,
     updateNodes,
     subscribeToTopic,
     unsubscribeFromTopic,
-    ROS_KEY // Export ROS_KEY as part of rosState for app.provide in main.js
   };
-
-  return rosState;
-}
-
-export function useROS() {
-  const rosState = inject(ROS_KEY);
-  if (!rosState) {
-    throw new Error('useROS must be used within a createROS setup.');
-  }
-  return rosState;
 }

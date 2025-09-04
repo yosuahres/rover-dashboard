@@ -33,19 +33,19 @@
         </div>
         <button
           type="submit"
-          :disabled="loading"
+          :disabled="mainStore.loading"
           class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full disabled:opacity-50"
         >
-          {{ loading ? 'Connecting...' : 'Connect' }}
+          {{ mainStore.loading ? 'Connecting...' : 'Connect' }}
         </button>
-        <div v-if="status === null && !loading" class="mt-4 text-center text-sm text-gray-600">
+        <div v-if="mainStore.status === null && !mainStore.loading" class="mt-4 text-center text-sm text-gray-600">
           <!-- Initial state, no message -->
         </div>
-        <div v-else-if="loading" class="mt-4 text-center text-sm text-blue-600">
+        <div v-else-if="mainStore.loading" class="mt-4 text-center text-sm text-blue-600">
           Loading...
         </div>
-        <div v-else :class="{'text-green-600': status === 'Connected', 'text-red-600': status === 'Disconnected'}" class="mt-4 text-center text-sm">
-          {{ message }}
+        <div v-else :class="{'text-green-600': mainStore.status === 'Connected', 'text-red-600': mainStore.status === 'Disconnected'}" class="mt-4 text-center text-sm">
+          {{ mainStore.message }}
         </div>
       </form>
     </div>
@@ -54,12 +54,14 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import { useMainStore } from '../stores/store';
 import { useROS } from '../composables/useRos';
 
 const ip = ref<string>('');
 const port = ref<string>('9090');
 
-const { ros, loading, status, message, initializeROS } = useROS();
+const mainStore = useMainStore();
+const { initializeROS } = useROS(); // Only get actions from useROS
 
 onMounted(() => {
   const storedIp = localStorage.getItem('ip');
@@ -77,8 +79,8 @@ const handlePortChange = (e: Event) => {
 };
 
 const connectRos = () => {
-  if (ros.value) {
-    ros.value.close();
+  if (mainStore.ros) {
+    mainStore.ros.close();
     console.log('ROS connection closed');
   }
 
@@ -88,5 +90,3 @@ const connectRos = () => {
   initializeROS(ip.value, port.value);
 };
 </script>
-
-

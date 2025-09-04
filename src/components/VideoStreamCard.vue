@@ -32,7 +32,8 @@
 
 <script setup>
 import { ref, computed, defineProps, getCurrentInstance } from 'vue';
-import { useROS } from '../composables/useRos.js';
+import { useMainStore } from '../stores/store.js';
+import { useROS } from '../composables/useRos.js'; // Keep for actions if needed later
 
 const props = defineProps({
   cardTitle: {
@@ -41,7 +42,7 @@ const props = defineProps({
   },
 });
 
-const { server } = useROS();
+const mainStore = useMainStore();
 const { uid: _uid } = getCurrentInstance(); // For unique IDs in template
 
 const currentTopic = ref('');
@@ -52,10 +53,9 @@ const toggleInputForm = () => {
 };
 
 const videoStreamUrl = computed(() => {
-  if (currentTopic.value && server.value) {
-    return `http://${server.value}:8080/stream?topic=${currentTopic.value}`;
+  if (currentTopic.value && mainStore.server) {
+    return `http://${mainStore.server}:8080/stream?topic=${currentTopic.value}`;
   }
   return null;
 });
 </script>
-

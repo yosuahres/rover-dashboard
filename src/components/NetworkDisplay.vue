@@ -9,14 +9,14 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue';
-import { useROS } from '../composables/useRos';
+import { useMainStore } from '../stores/store';
 
-const { server } = useROS();
+const mainStore = useMainStore();
 const ping = ref('N/A');
 const BAD_PING_THRESHOLD = 150; // Threshold for a "bad" ping in ms
 let intervalId;
 
-const getPingClass = computed(() => {
+const pingClass = computed(() => {
   if (typeof ping.value !== 'number') {
     return 'text-red-500'; 
   }
@@ -25,11 +25,11 @@ const getPingClass = computed(() => {
 
 onMounted(() => {
   intervalId = setInterval(async () => {
-    if (server.value) {
+    if (mainStore.server) {
       const startTime = performance.now();
       try {
         // Use a HEAD request for minimal data transfer, or GET if HEAD is not supported by the ROS server
-        await fetch(`http://${server.value}`, { method: 'HEAD', mode: 'no-cors' });
+        await fetch(`http://${mainStore.server}`, { method: 'HEAD', mode: 'no-cors' });
         const endTime = performance.now();
         ping.value = Math.round(endTime - startTime);
       } catch (error) {
