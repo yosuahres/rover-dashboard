@@ -2,7 +2,8 @@
   <div class="p-4 h-full">
     <div class="mb-4 p-4 border rounded-lg shadow-md bg-white">
       <h2 class="text-xl text-black font-semibold mb-2">ROS Status</h2>
-      <p class="text-sm" :class="{ 'text-green-600': status === 'Connected', 'text-red-600': status === 'Disconnected', 'text-gray-600': status === null }">
+      <p class="text-xl text-black">IP: {{ rosIp }} || PORT: {{rosPort}}</p>
+      <p class="text-xl" :class="{ 'text-green-600': status === 'Connected', 'text-red-600': status === 'Disconnected', 'text-gray-600': status === null }">
         Status: {{ status || 'Not Connected' }} - {{ message }}
       </p>
     </div>
@@ -49,7 +50,7 @@
 import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { useROS } from '../composables/useRos.js';
 
-const rosIp = ref('localhost'); // Default ROS IP
+const rosIp = ref('127.0.0.1'); // Default ROS IP
 const rosPort = ref(9090); // Default ROS Port
 
 const {
