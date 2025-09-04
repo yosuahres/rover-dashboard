@@ -50,3 +50,10 @@
     <router-view class="flex-grow h-full" />
   </div>
 </template>
+
+<script setup>
+import { createROS } from './composables/useRos';
+
+// Initialize ROS context for the entire application
+createROS();
+</script>
