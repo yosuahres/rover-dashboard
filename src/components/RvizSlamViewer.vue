@@ -61,7 +61,7 @@ const initRviz = () => {
     pointCloud2 = new ROS3D.PointCloud2({
       ros: ros.value,
       tfClient: tfClient,
-      topic: '/camera/depth/points', // Adjust this topic to your lidar's point cloud topic
+      topic: '/camera/depth/points', // !CHANGEDTHIS
       material: { size: 0.05, color: 0xff00ff },
     });
     viewer.addObject(pointCloud2);
