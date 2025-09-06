@@ -17,12 +17,18 @@ importers:
       pinia:
         specifier: ^3.0.3
         version: 3.0.3(vue@3.5.21)
+      ros3d:
+        specifier: ^1.1.0
+        version: 1.1.0
       roslib:
         specifier: ^1.4.1
         version: 1.4.1
       tailwindcss:
         specifier: ^4.1.12
         version: 4.1.12
+      three:
+        specifier: ^0.180.0
+        version: 0.180.0
       vue:
         specifier: ^3.5.18
         version: 3.5.21
@@ -798,6 +804,9 @@ packages:
     engines: {node: '>=18.0.0', npm: '>=8.0.0'}
     hasBin: true
 
+  ros3d@1.1.0:
+    resolution: {integrity: sha512-mYdWMjsXchlduiCam6pPzJaPKPc43GzsG/iDQYDn2x5UVUem2ZC4xc6JADHuANJe6LqedQc/8AN3GdQMNuTIDw==}
+
   roslib@1.4.1:
     resolution: {integrity: sha512-l3BOHqG99RHb73XROykj8o2rRaUqqYwN0E6C1EkH+R1GIfDjMaUGPaCNEoKKmsXT0Vu0EOyL1BudQtdVlMsgjA==}
     engines: {node: '>=0.10'}
@@ -835,6 +844,12 @@ packages:
   tar@7.4.3:
     resolution: {integrity: sha512-5S7Va8hKfV7W5U6g3aYxXmlPoZVAwUMy9AOKyF2fVuZa2UD3qZjg578OrLRt8PcNN1PleVaL/5/yYATNL0ICUw==}
     engines: {node: '>=18'}
+
+  three@0.180.0:
+    resolution: {integrity: sha512-o+qycAMZrh+TsE01GqWUxUIKR1AL0S8pq7zDkYOQw8GqfX8b8VoCKYUoHbhiX5j+7hr8XsuHDVU6+gkQJQKg9w==}
+
+  three@0.89.0:
+    resolution: {integrity: sha512-Evv3JolLQtag/lCWu1o3cgz2E5UYCSZHbh9lfBjeLz7nlK8DMmASID680Odl++ZPYk63rrZjPAMq88IrMP3GCA==}
 
   tinyglobby@0.2.14:
     resolution: {integrity: sha512-tX5e7OM1HnYr2+a2C/4V0htOcSQcoSTH9KgJnVvNm5zm/cyEWKJ7j7YutsH9CxMdtOkkLFy2AHrMci9IM8IPZQ==}
@@ -1550,6 +1565,16 @@ snapshots:
       '@rollup/rollup-win32-x64-msvc': 4.50.0
       fsevents: 2.3.3
 
+  ros3d@1.1.0:
+    dependencies:
+      eventemitter2: 6.4.9
+      roslib: 1.4.1
+      three: 0.89.0
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - utf-8-validate
+
   roslib@1.4.1:
     dependencies:
       '@xmldom/xmldom': 0.8.11
@@ -1616,6 +1641,10 @@ snapshots:
       minizlib: 3.0.2
       mkdirp: 3.0.1
       yallist: 5.0.0
+
+  three@0.180.0: {}
+
+  three@0.89.0: {}
 
   tinyglobby@0.2.14:
     dependencies:

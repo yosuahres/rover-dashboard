@@ -19,7 +19,7 @@
         :id="`video-topic-input-${_uid}`"
         v-model="currentTopic"
         placeholder="/camera/image_raw"
-        class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+        class="block text-black w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
       />
     </div>
 
@@ -33,7 +33,7 @@
 <script setup>
 import { ref, computed, defineProps, getCurrentInstance } from 'vue';
 import { useMainStore } from '../stores/store.js';
-import { useROS } from '../composables/useRos.js'; // Keep for actions if needed later
+import { useROS } from '../composables/useRos.js'; 
 
 const props = defineProps({
   cardTitle: {

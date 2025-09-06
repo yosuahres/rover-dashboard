@@ -8,38 +8,49 @@
       </p>
     </div>
 
-    <div class="flex flex-col md:flex-row gap-2 mt-2">
-      <div class="md:w-1/4 p-4 border rounded-lg shadow-md bg-white">
-        <h2 class="text-xl text-black font-semibold mb-4">ROS Nodes ({{ mainStore.nodes.length }})</h2>
-        <ul class="list-disc pl-5 text-gray-700 max-h-96 overflow-y-auto">
-          <li v-for="node in mainStore.nodes" :key="node" class="mb-1">{{ node }}</li>
-        </ul>
+    <div class="mt-4 p-4 border rounded-lg shadow-md bg-white h-96">
+      <h2 class="text-xl text-black font-semibold mb-4">RViz Visualization</h2>
+      <div class="h-[calc(100%-40px)]">
+        <RvizViewer />
+      </div>
+    </div>
+
+    <div class="flex flex-col md:flex-row gap-4 mt-4 h-[calc(100%-120px-theme('height.96'))]">
+      <div class="md:w-1/2 flex flex-col gap-4">
+        <div class="p-4 border rounded-lg shadow-md bg-white flex-grow">
+          <h2 class="text-xl text-black font-semibold mb-4">ROS Nodes ({{ mainStore.nodes.length }})</h2>
+          <ul class="list-disc pl-5 text-gray-700 max-h-64 overflow-y-auto">
+            <li v-for="node in mainStore.nodes" :key="node" class="mb-1">{{ node }}</li>
+          </ul>
+        </div>
       </div>
 
-      <div class="md:w-3/4 p-4 border rounded-lg shadow-md bg-white">
-        <h2 class="text-xl text-black font-semibold mb-4">ROS Topics ({{ mainStore.topics.size }})</h2>
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-800">
-              <tr>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Topic</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Type</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Message</th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="[topicName, topicType] in mainStore.topics" :key="topicName">
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ topicName }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ topicType }}</td>
-                <td class="px-6 py-4 text-sm text-gray-500">
-                  <div v-if="mainStore.messages.has(topicName)" class="max-h-20 overflow-y-auto bg-gray-50 p-2 rounded-md">
-                    <pre class="text-xs">{{ JSON.stringify(mainStore.messages.get(topicName), null, 2) }}</pre>
-                  </div>
-                  <div v-else>No message yet</div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+      <div class="md:w-1/2 flex flex-col gap-4">
+        <div class="p-4 border rounded-lg shadow-md bg-white flex-grow">
+          <h2 class="text-xl text-black font-semibold mb-4">ROS Topics ({{ mainStore.topics.size }})</h2>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-800">
+                <tr>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Topic</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Type</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Message</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr v-for="[topicName, topicType] in mainStore.topics" :key="topicName">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ topicName }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ topicType }}</td>
+                  <td class="px-6 py-4 text-sm text-gray-500">
+                    <div v-if="mainStore.messages.has(topicName)" class="max-h-20 overflow-y-auto bg-gray-50 p-2 rounded-md">
+                      <pre class="text-xs">{{ JSON.stringify(mainStore.messages.get(topicName), null, 2) }}</pre>
+                    </div>
+                    <div v-else>No message yet</div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -50,6 +61,7 @@
 import { onMounted, onUnmounted, watch } from 'vue';
 import { useMainStore } from '../stores/store.js';
 import { useROS } from '../composables/useRos.js';
+import RvizViewer from '../components/RvizViewer.vue';
 
 const mainStore = useMainStore();
 const {

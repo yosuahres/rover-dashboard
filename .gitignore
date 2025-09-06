@@ -23,4 +23,8 @@ dist-ssr
 *.sln
 *.sw?
 
+# unnessary mac platform build file
 .vscode
+vscode
+.DS_Store
+DS_Store
