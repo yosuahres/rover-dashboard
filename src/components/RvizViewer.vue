@@ -29,7 +29,7 @@ const initRviz = () => {
     // Add a grid to the viewer
     grid = new ROS3D.Grid({
       ros: ros.value,
-      tfClient: tfClient, // TFClient will be initialized below
+      tfClient: tfClient, 
       size: 10,
       cellSize: 1,
       lineWidth: 1,
@@ -40,7 +40,7 @@ const initRviz = () => {
     // Initialize TFClient
     tfClient = new ROS3D.TFClient({
       ros: ros.value,
-      fixedFrame: '/odom', // Or your desired fixed frame
+      fixedFrame: '/odom', //!CHANGEDTHIS
       angularThresh: 0.01,
       transThresh: 0.01,
       rate: 10.0,
@@ -50,14 +50,24 @@ const initRviz = () => {
     urdf = new ROS3D.UrdfModel({
       ros: ros.value,
       tfClient: tfClient,
-      path: `http://${ros.value.url.split('ws://')[1].split(':')[0]}:9090/urdf/`, // Use the ROS server IP for URDF
+      path: `http://${ros.value.url.split('ws://')[1].split(':')[0]}:9090/urdf/`, 
       color: 0x00ff00,
       opacity: 1.0,
       collision: false,
     });
     viewer.addObject(urdf);
 
-    // Example: Add a PointCloud2 display
+    // Add an OccupancyGrid display for SLAM maps
+    const occupancyGridClient = new ROS3D.OccupancyGrid({
+      ros: ros.value,
+      tfClient: tfClient,
+      topic: '/map', // !CHANGEDTHIS
+      color: 0x0062ff, 
+      opacity: 0.7,
+    });
+    viewer.addObject(occupancyGridClient);
+
+    // Example: Add a PointCloud2 display (uncomment and configure if needed)
     // const pointCloud2 = new ROS3D.PointCloud2({
     //   ros: ros.value,
     //   tfClient: tfClient,
@@ -118,6 +128,6 @@ onUnmounted(() => {
 .rviz-viewer {
   width: 100%;
   height: 100%;
-  background-color: #333333; /* Dark background for the viewer */
+  background-color: #333333; 
 }
 </style>
