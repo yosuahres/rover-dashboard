@@ -11,7 +11,8 @@ const viewerContainer = ref(null);
 let viewer = null;
 let tfClient = null;
 let grid = null;
-let urdf = null;
+let occupancyGridClient = null;
+let pointCloud2 = null;
 
 const { ros, isConnected } = useROS();
 
@@ -46,16 +47,24 @@ const initRviz = () => {
     });
     viewer.addObject(grid);
 
-    // Add a URDF model to the viewer
-    urdf = new ROS3D.UrdfModel({
+    // Add an OccupancyGrid display for SLAM maps
+    occupancyGridClient = new ROS3D.OccupancyGrid({
       ros: ros.value,
       tfClient: tfClient,
-      path: `http://${ros.value.url.split('ws://')[1].split(':')[0]}:9090/urdf/`, 
-      color: 0x00ff00,
-      opacity: 1.0,
-      collision: false,
+      topic: '/map',
+      color: 0x0062ff, 
+      opacity: 0.7,
     });
-    viewer.addObject(urdf);
+    viewer.addObject(occupancyGridClient);
+
+    // Add a PointCloud2 display for lidar data
+    pointCloud2 = new ROS3D.PointCloud2({
+      ros: ros.value,
+      tfClient: tfClient,
+      topic: '/camera/depth/points', // Adjust this topic to your lidar's point cloud topic
+      material: { size: 0.05, color: 0xff00ff },
+    });
+    viewer.addObject(pointCloud2);
 
     // Handle window resize
     window.addEventListener('resize', resizeViewer);
@@ -80,8 +89,11 @@ const destroyRviz = () => {
   if (grid) {
     grid = null;
   }
-  if (urdf) {
-    urdf = null;
+  if (occupancyGridClient) {
+    occupancyGridClient = null;
+  }
+  if (pointCloud2) {
+    pointCloud2 = null;
   }
   window.removeEventListener('resize', resizeViewer);
 };
@@ -89,7 +101,7 @@ const destroyRviz = () => {
 onMounted(() => {
   // Ensure the container has an ID for ROS3D.Viewer
   if (viewerContainer.value) {
-    viewerContainer.value.id = 'rviz-viewer-container';
+    viewerContainer.value.id = 'rviz-slam-viewer-container';
   }
   watch([ros, isConnected], ([newRos, newIsConnected]) => {
     if (newRos && newIsConnected && !viewer) {

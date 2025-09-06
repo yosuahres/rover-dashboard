@@ -8,15 +8,24 @@
       </p>
     </div>
 
-    <div class="mt-4 p-4 border rounded-lg shadow-md bg-white h-96">
-      <h2 class="text-xl text-black font-semibold mb-4">RViz Visualization</h2>
-      <div class="h-[calc(100%-40px)]">
-        <RvizViewer />
+    <div class="flex flex-col md:flex-row gap-2 mt-4 h-[calc(100vh-200px)]">
+      <div class="md:w-1/2 p-4 border rounded-lg shadow-md bg-white">
+        <h2 class="text-xl text-black font-semibold mb-4">URDF Visualization</h2>
+        <div class="h-[calc(100%-40px)]">
+          <RvizViewer />
+        </div>
+      </div>
+      <div class="md:w-1/2 p-4 border rounded-lg shadow-md bg-white">
+        <h2 class="text-xl text-black font-semibold mb-4">SLAM Visualization</h2>
+        <div class="h-[calc(100%-40px)]">
+          <RvizSlamViewer />
+        </div>
       </div>
     </div>
 
-    <div class="flex flex-col md:flex-row gap-4 mt-4 h-[calc(100%-120px-theme('height.96'))]">
-      <div class="md:w-1/2 flex flex-col gap-4">
+    <div class="flex flex-col md:flex-row gap-2 mt-2 h-[calc(100%-120px-theme('height.96'))]"></div>
+    <div class="flex flex-col md:flex-row gap-2 mt-2 h-[calc(100%-120px-theme('height.96'))]">
+      <div class="md:w-1/2 flex flex-col gap-2">
         <div class="p-4 border rounded-lg shadow-md bg-white flex-grow">
           <h2 class="text-xl text-black font-semibold mb-4">ROS Nodes ({{ mainStore.nodes.length }})</h2>
           <ul class="list-disc pl-5 text-gray-700 max-h-64 overflow-y-auto">
@@ -25,7 +34,7 @@
         </div>
       </div>
 
-      <div class="md:w-1/2 flex flex-col gap-4">
+      <div class="md:w-1/2 flex flex-col gap-2">
         <div class="p-4 border rounded-lg shadow-md bg-white flex-grow">
           <h2 class="text-xl text-black font-semibold mb-4">ROS Topics ({{ mainStore.topics.size }})</h2>
           <div class="overflow-x-auto">
@@ -62,6 +71,7 @@ import { onMounted, onUnmounted, watch } from 'vue';
 import { useMainStore } from '../stores/store.js';
 import { useROS } from '../composables/useRos.js';
 import RvizViewer from '../components/RvizViewer.vue';
+import RvizSlamViewer from '../components/RvizSlamViewer.vue';
 
 const mainStore = useMainStore();
 const {
