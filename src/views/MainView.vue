@@ -1,11 +1,23 @@
 <template>
   <div class="p-4 h-full">
-    <div class="mb-4 p-4 border rounded-lg shadow-md bg-white">
-      <h2 class="text-xl text-black font-semibold mb-2">ROS Status</h2>
-      <p class="text-xl text-black">IP: {{ mainStore.server }} || PORT: 9090</p>
-      <p class="text-xl" :class="{ 'text-green-600': mainStore.status === 'Connected', 'text-red-600': mainStore.status === 'Disconnected', 'text-gray-600': mainStore.status === null }">
-        Status: {{ mainStore.status || 'Not Connected' }} - {{ mainStore.message }}
-      </p>
+    <div class="mb-4 flex flex-col md:flex-row gap-2">
+      <!-- ROS Status -->
+      <div class="flex-1 p-4 border rounded-lg shadow-md bg-white">
+        <h2 class="text-xl text-black font-semibold mb-2">ROS Status</h2>
+        <p class="text-xl text-black">IP: {{ mainStore.server }} || PORT: 9090</p>
+        <p class="text-xl" :class="{ 'text-green-600': mainStore.status === 'Connected', 'text-red-600': mainStore.status === 'Disconnected', 'text-gray-600': mainStore.status === null }">
+          Status: {{ mainStore.status || 'Not Connected' }} - {{ mainStore.message }}
+        </p>
+      </div>
+      <!-- Robot Info -->
+      <div class="flex-1 p-4 border rounded-lg shadow-md bg-white" id="robot-info-box">
+        <h2 class="text-xl text-black font-semibold mb-2">Robot Info</h2>
+        <div class="space-y-2">
+          <p class="text-black"><strong>Velocity:</strong> <span id="info-velocity">{{ robotVelocity.toFixed(2) }}</span> m/s</p>
+          <p class="text-black"><strong>Steering:</strong> <span id="info-steering">{{ robotSteering.toFixed(2) }}</span> rad</p>
+          <p class="text-black"><strong>Lookahead:</strong> <span id="info-lookahead">0.0</span> m</p>
+        </div>
+      </div>
     </div>
 
     <div class="flex flex-col md:flex-row gap-2 mt-4 h-[calc(100vh-200px)]">
@@ -67,7 +79,7 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, watch } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { useMainStore } from '../stores/store.js';
 import { useROS } from '../composables/useRos.js';
 import RvizViewer from '../components/RvizViewer.vue';
@@ -82,7 +94,30 @@ const {
   unsubscribeFromTopic,
 } = useROS();
 
+const robotVelocity = ref(0.0);
+const robotSteering = ref(0.0);
+
+// setup subscribers 
+const setupRosSubscribers = () => {
+  if (!mainStore.isConnected || !mainStore.robotVelInfoSubscriber || !mainStore.robotSteeringSubscriber) {
+    return;
+  }
+  mainStore.robotVelInfoSubscriber.subscribe(msg => {
+    robotVelocity.value = msg.data;
+  });
+  mainStore.robotSteeringSubscriber.subscribe(msg => {
+    robotSteering.value = msg.data;
+  });
+};
+
+const cleanupRosSubscribers = () => {
+  if (mainStore.robotVelInfoSubscriber) mainStore.robotVelInfoSubscriber.unsubscribe();
+  if (mainStore.robotSteeringSubscriber) mainStore.robotSteeringSubscriber.unsubscribe();
+};
+
+
 let updateInterval = null;
+
 
 onMounted(() => {
   // use default localhost if no server is set
@@ -96,7 +131,20 @@ onMounted(() => {
       updateNodes();
     }
   }, 1000); // Update every 1 second
+
+  // setup subscriber listener
+  if (mainStore.isConnected) {
+    setupRosSubscribers();
+  }
+  watch(() => mainStore.isConnected, (val) => {
+    if (val) {
+      setupRosSubscribers();
+    } else {
+      cleanupRosSubscribers();
+    }
+  }, { immediate: true });
 });
+
 
 onUnmounted(() => {
   if (updateInterval) {
@@ -104,6 +152,7 @@ onUnmounted(() => {
   }
   // Unsubscribe from all topics when component is unmounted
   mainStore.topics.forEach((type, name) => unsubscribeFromTopic(name));
+  cleanupRosSubscribers();
 });
 
 // Watch for changes in topics and subscribe to new ones

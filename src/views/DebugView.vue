@@ -172,6 +172,3 @@ onUnmounted(() => {
 });
 </script>
 
-<style scoped>
-/* Add any component-specific styles here if needed, though Tailwind should handle most */
-</style>
