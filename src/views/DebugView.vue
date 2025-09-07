@@ -4,7 +4,6 @@
     <div class="container mx-auto">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
 
-        <!-- Robot Info Panel -->
         <div class="md:col-span-1">
           <div class="bg-white shadow-md rounded-lg p-6" id="robot-info-box">
             <h2 class="text-xl text-black font-semibold mb-4">Robot Info</h2>
@@ -16,7 +15,6 @@
           </div>
         </div>
 
-        <!-- Configuration Panel -->
         <div class="md:col-span-4">
           <div class="bg-white shadow-md rounded-lg p-6" id="config-panel">
             <h2 class="text-xl font-semibold text-blue-600 mb-4">Configuration Panel</h2>
@@ -45,17 +43,16 @@
 import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { useMainStore } from '../stores/store';
 import { useROS } from '../composables/useRos';
-import Chart from 'chart.js/auto';
 
 const mainStore = useMainStore();
 const { isConnected } = useROS(); 
 
-// Reactive state for UI elements
 const robotVelocity = ref(0.0);
 const robotSteering = ref(0.0);
 const configurations = ref(Array(19).fill(0)); 
 
 const configurationNames = [
+  // nama params
   "k_p_wheel",
   "k_i_wheel", 
   "k_d_wheel", 
@@ -77,17 +74,6 @@ const configurationNames = [
   "K_model"
 ];
 
-// Chart instances
-let rosChartVelocityInstance = null;
-let rosChartSteeringInstance = null;
-const dataWindow = 100; // Reduced for better performance in a small chart
-
-// Chart data
-const velocityChartData = ref(Array(dataWindow).fill(0));
-const steeringChartData = ref(Array(dataWindow).fill(0));
-const chartLabels = ref(Array(dataWindow).fill(''));
-const t0 = Date.now(); // Record when page loaded (in ms)
-
 // Functions for ROS communication
 const setupRosSubscribers = () => {
   if (!mainStore.isConnected || !mainStore.configListener) {
@@ -100,33 +86,12 @@ const setupRosSubscribers = () => {
     console.log("Received configuration from ROS:", msg.data);
   });
 
-  mainStore.robotVelSubscriber.subscribe(msg => {
-    const tStep = ((Date.now() - t0) / 1000).toFixed(2);
-    velocityChartData.value.push(msg.data);
-    velocityChartData.value.shift();
-    chartLabels.value.push(tStep);
-    chartLabels.value.shift();
-    if (rosChartVelocityInstance) {
-      rosChartVelocityInstance.data.labels = chartLabels.value;
-      rosChartVelocityInstance.data.datasets[0].data = velocityChartData.value;
-      rosChartVelocityInstance.update('none');
-    }
-  });
-
   mainStore.robotVelInfoSubscriber.subscribe(msg => {
     robotVelocity.value = msg.data;
   });
 
   mainStore.robotSteeringSubscriber.subscribe(msg => {
     robotSteering.value = msg.data;
-    const tStep = ((Date.now() - t0) / 1000).toFixed(2);
-    steeringChartData.value.push(msg.data * (180 / Math.PI)); // Convert rad to deg
-    steeringChartData.value.shift();
-    if (rosChartSteeringInstance) {
-      rosChartSteeringInstance.data.labels = chartLabels.value;
-      rosChartSteeringInstance.data.datasets[0].data = steeringChartData.value;
-      rosChartSteeringInstance.update('none');
-    }
   });
 };
 
@@ -188,63 +153,6 @@ const handleKeyDown = (event) => {
 
 // Lifecycle hooks
 onMounted(() => {
-  // Initialize charts
-  const ctxVel = document.getElementById('rosChartVelocity').getContext('2d');
-  rosChartVelocityInstance = new Chart(ctxVel, {
-    type: 'line',
-    data: {
-      labels: chartLabels.value,
-      datasets: [{
-        label: 'Velocity (m/s)',
-        data: velocityChartData.value,
-        fill: false,
-        borderColor: 'rgb(52,152,219)',
-        tension: 0.1
-      }]
-    },
-    options: {
-      animation: false,
-      scales: {
-        x: { display: true, title: { display: true, text: 't' } },
-        y: {
-          min: -0.5, max: 1.5,
-          ticks: { font: { size: 12 } },
-          grid: { color: '#eee' }
-        }
-      },
-      responsive: true,
-      maintainAspectRatio: false,
-    }
-  });
-
-  const ctxSteer = document.getElementById('rosChartSteering').getContext('2d');
-  rosChartSteeringInstance = new Chart(ctxSteer, {
-    type: 'line',
-    data: {
-      labels: chartLabels.value,
-      datasets: [{
-        label: 'Steering (deg)',
-        data: steeringChartData.value,
-        fill: false,
-        borderColor: 'rgb(219, 52, 52)',
-        tension: 0.1,
-      }]
-    },
-    options: {
-      animation: false,
-      scales: {
-        x: { display: true, title: { display: true, text: 't' } },
-        y: {
-          min: -45, max: 45,
-          ticks: { font: { size: 12 } },
-          grid: { color: '#eee' }
-        }
-      },
-      responsive: true,
-      maintainAspectRatio: false,
-    }
-  });
-
   // Add keyboard listener
   window.addEventListener('keydown', handleKeyDown);
 
@@ -260,10 +168,6 @@ onMounted(() => {
 
 onUnmounted(() => {
   cleanupRosSubscribers();
-
-  if (rosChartVelocityInstance) rosChartVelocityInstance.destroy();
-  if (rosChartSteeringInstance) rosChartSteeringInstance.destroy();
-
   window.removeEventListener('keydown', handleKeyDown);
 });
 </script>
