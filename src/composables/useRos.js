@@ -18,6 +18,7 @@ export function useROS() {
       mainStore.setMessage(`Connected to ROS master: ${url}`);
       mainStore.setLoading(false);
       mainStore.setStatus('Connected');
+      initializeRosTopics(rosConnection); 
     });
 
     rosConnection.on('error', (error) => {
@@ -33,6 +34,66 @@ export function useROS() {
       mainStore.setLoading(false);
       mainStore.clearAllRosData();
     });
+  }
+
+  function initializeRosTopics(rosInstance) {
+    if (!rosInstance) {
+      console.warn("ROS instance not provided for topic initialization.");
+      return;
+    }
+
+    // Publishers
+    const topicConfiguration = new ROSLIB.Topic({
+      ros: rosInstance,
+      name: '/web/config/configuration',
+      messageType: 'std_msgs/Float32MultiArray'
+    });
+    mainStore.setTopicConfiguration(topicConfiguration);
+
+    const topicVelocityAndSteering = new ROSLIB.Topic({
+      ros: rosInstance,
+      name: '/master/ui_target_velocity_and_steering',
+      messageType: 'std_msgs/Float32MultiArray'
+    });
+    mainStore.setTopicVelocityAndSteering(topicVelocityAndSteering);
+
+
+    // Subscribers
+    const configListener = new ROSLIB.Topic({
+      ros: rosInstance,
+      name: '/web/config/configuration_init',
+      messageType: 'std_msgs/Float32MultiArray'
+    });
+    mainStore.setConfigListener(configListener);
+
+    const robotVelSubscriber = new ROSLIB.Topic({
+      ros: rosInstance,
+      name: '/motor_main/velocity_feedback',
+      messageType: 'std_msgs/Float32'
+    });
+    mainStore.setRobotVelSubscriber(robotVelSubscriber);
+
+    const robotVelInfoSubscriber = new ROSLIB.Topic({
+      ros: rosInstance,
+      name: '/master/target_speed',
+      messageType: 'std_msgs/Float32'
+    });
+    mainStore.setRobotVelInfoSubscriber(robotVelInfoSubscriber);
+
+    const robotSteeringSubscriber = new ROSLIB.Topic({
+      ros: rosInstance,
+      name: '/master/target_steering',
+      messageType: 'std_msgs/Float32'
+    });
+    mainStore.setRobotSteeringSubscriber(robotSteeringSubscriber);
+
+    // Request initial config
+    const reqConfig = new ROSLIB.Topic({
+      ros: rosInstance,
+      name: '/web/config/request_config',
+      messageType: 'std_msgs/Int16'
+    });
+    reqConfig.publish({});
   }
 
   // Helper to compare two Maps so we only update if topics truly changed.
@@ -134,5 +195,6 @@ export function useROS() {
     updateNodes,
     subscribeToTopic,
     unsubscribeFromTopic,
+    initializeRosTopics, // Expose this function
   };
 }

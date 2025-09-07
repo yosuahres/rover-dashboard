@@ -12,6 +12,14 @@ export const useMainStore = defineStore('main', {
     nodes: [], // string[] for node names
     messages: new Map(), // Map<string, any> for topicName -> latestMessage
     subscriptions: new Map(), // Map<string, ROSLIB.Topic> for topicName -> subscriber
+
+    // ROS Topic instances for DebugView
+    topicConfiguration: null,
+    topicVelocityAndSteering: null,
+    configListener: null,
+    robotVelSubscriber: null,
+    robotSteeringSubscriber: null,
+    robotVelInfoSubscriber: null,
   }),
   getters: {
     isConnected: (state) => state.status === 'Connected',
@@ -23,6 +31,12 @@ export const useMainStore = defineStore('main', {
     setLoading(isLoading) {
       this.loading = isLoading;
     },
+    setTopicConfiguration(topic) { this.topicConfiguration = topic; },
+    setTopicVelocityAndSteering(topic) { this.topicVelocityAndSteering = topic; },
+    setConfigListener(listener) { this.configListener = listener; },
+    setRobotVelSubscriber(subscriber) { this.robotVelSubscriber = subscriber; },
+    setRobotSteeringSubscriber(subscriber) { this.robotSteeringSubscriber = subscriber; },
+    setRobotVelInfoSubscriber(subscriber) { this.robotVelInfoSubscriber = subscriber; },
     setStatus(newStatus) {
       this.status = newStatus;
     },
@@ -61,6 +75,19 @@ export const useMainStore = defineStore('main', {
       this.ros = null;
       this.status = 'Disconnected';
       this.loading = false;
+
+      // Clear DebugView specific topics
+      if (this.topicConfiguration) this.topicConfiguration = null;
+      if (this.topicVelocityAndSteering) this.topicVelocityAndSteering = null;
+      if (this.configListener) this.configListener.unsubscribe();
+      if (this.robotVelSubscriber) this.robotVelSubscriber.unsubscribe();
+      if (this.robotSteeringSubscriber) this.robotSteeringSubscriber.unsubscribe();
+      if (this.robotVelInfoSubscriber) this.robotVelInfoSubscriber.unsubscribe();
+
+      this.configListener = null;
+      this.robotVelSubscriber = null;
+      this.robotSteeringSubscriber = null;
+      this.robotVelInfoSubscriber = null;
     },
   },
 });

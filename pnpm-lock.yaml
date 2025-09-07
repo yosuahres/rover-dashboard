@@ -11,6 +11,9 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.1.12
         version: 4.1.12(vite@7.1.4(@types/node@24.3.0)(jiti@2.5.1)(lightningcss@1.30.1))
+      chart.js:
+        specifier: ^4.5.0
+        version: 4.5.0
       konva:
         specifier: ^9.3.22
         version: 9.3.22
@@ -299,6 +302,9 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.30':
     resolution: {integrity: sha512-GQ7Nw5G2lTu/BtHTKfXhKHok2WGetd4XYcVKGx00SjAk8GMwgJM3zr6zORiPGuOE+/vkc90KtTosSSvaCjKb2Q==}
+
+  '@kurkle/color@0.3.4':
+    resolution: {integrity: sha512-M5UknZPHRu3DEDWoipU6sE8PdkZ6Z/S+v4dD+Ke8IaNlpdSQah50lz1KtcFBa2vsdOnwbbnxJwVM4wty6udA5w==}
 
   '@rolldown/pluginutils@1.0.0-beta.29':
     resolution: {integrity: sha512-NIJgOsMjbxAXvoGq/X0gD7VPMQ8j9g0BiDaNjVNVjvl+iKXxL3Jre0v31RmBYeLEmkbj2s02v8vFTbUXi5XS2Q==}
@@ -640,6 +646,10 @@ packages:
 
   cbor-js@0.1.0:
     resolution: {integrity: sha512-7sQ/TvDZPl7csT1Sif9G0+MA0I0JOVah8+wWlJVQdVEgIbCzlN/ab3x+uvMNsc34TUvO6osQTAmB2ls80JX6tw==}
+
+  chart.js@4.5.0:
+    resolution: {integrity: sha512-aYeC/jDgSEx8SHWZvANYMioYMZ2KX02W6f6uVfyteuCGcadDLcYVHdfdygsTQkQ4TKn5lghoojAsPj5pu0SnvQ==}
+    engines: {pnpm: '>=8'}
 
   chownr@3.0.0:
     resolution: {integrity: sha512-+IxzY9BZOQd/XuYPRmrvEVjF/nqj5kgT4kEq7VofrDoM1MxoRjEWkrCC3EtLi59TVawxTAn+orJwFQcrqEN1+g==}
@@ -1180,6 +1190,8 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
+  '@kurkle/color@0.3.4': {}
+
   '@rolldown/pluginutils@1.0.0-beta.29': {}
 
   '@rollup/rollup-android-arm-eabi@4.50.0':
@@ -1465,6 +1477,10 @@ snapshots:
   birpc@2.5.0: {}
 
   cbor-js@0.1.0: {}
+
+  chart.js@4.5.0:
+    dependencies:
+      '@kurkle/color': 0.3.4
 
   chownr@3.0.0: {}
 

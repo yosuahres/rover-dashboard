@@ -10,6 +10,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useMainStore } from '../stores/store';
+import { invoke } from '@tauri-apps/api/tauri'; // Import invoke
 
 const mainStore = useMainStore();
 const ping = ref('N/A');
@@ -26,12 +27,10 @@ const pingClass = computed(() => {
 onMounted(() => {
   intervalId = setInterval(async () => {
     if (mainStore.server) {
-      const startTime = performance.now();
       try {
-        // Use a HEAD request for minimal data transfer, or GET if HEAD is not supported by the ROS server
-        await fetch(`http://${mainStore.server}`, { method: 'HEAD', mode: 'no-cors' });
-        const endTime = performance.now();
-        ping.value = Math.round(endTime - startTime);
+        // Call the Rust backend command
+        const result = await invoke('ping_ip', { host: mainStore.server, timeout: 1000 }); // 1000ms timeout
+        ping.value = result;
       } catch (error) {
         console.error('Ping failed:', error);
         ping.value = 'Error';

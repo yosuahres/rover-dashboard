@@ -1,9 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import MainView from '../views/MainView.vue';
 import CameraView from '../views/CamView.vue';
-import DebugView from '../views/TerminalView.vue';
+import DebugView from '../views/DebugView.vue';
 import ScienceView from '../views/ScienceView.vue';
-import XXView from '../views/DebugView.vue';
 
 const routes = [
   {
@@ -29,11 +28,6 @@ const routes = [
     path: '/science',
     name: 'Science',
     component: ScienceView,
-  },
-  {
-    path: '/xx',
-    name: 'XX',
-    component: XXView,
   },
 ];
 
