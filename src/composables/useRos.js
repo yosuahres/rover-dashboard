@@ -18,7 +18,7 @@ export function useROS() {
       mainStore.setMessage(`Connected to ROS master: ${url}`);
       mainStore.setLoading(false);
       mainStore.setStatus('Connected');
-      initializeRosTopics(rosConnection); 
+      initializeRosTopics(rosConnection);
     });
 
     rosConnection.on('error', (error) => {

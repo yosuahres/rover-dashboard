@@ -53,15 +53,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { useMainStore } from '../stores/store';
 import { useROS } from '../composables/useRos';
 
 const ip = ref<string>('');
+const router = useRouter();
 const port = ref<string>('9090');
 
 const mainStore = useMainStore();
-const { initializeROS } = useROS(); // Only get actions from useROS
+const { initializeROS } = useROS(); 
 
 onMounted(() => {
   const storedIp = localStorage.getItem('ip');
@@ -89,4 +91,10 @@ const connectRos = () => {
 
   initializeROS(ip.value, port.value);
 };
+
+watch(() => mainStore.status, (newStatus) => {
+  if (newStatus === 'Connected') {
+    router.push('/data');
+  }
+});
 </script>

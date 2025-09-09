@@ -1,8 +1,8 @@
 <template>
-  <div class="min-h-screen w-full flex flex-col">
+  <div class="min-h-screen w-full flex flex-col bg-gray-100">
     <!-- on Dev mode, change the comparison string to == -->
-    <ConnectionForm v-if="status == 'Connected'" />
-    <div v-else class="min-h-screen w-full flex flex-col">
+    <ConnectionForm v-if="status !== 'Connected'" />
+    <div v-else class="min-h-screen w-full flex flex-col bg-gray-100">
       <nav class="bg-gray-100 p-4 flex items-center justify-between px-6">
         <div class="flex flex-grow justify-evenly mr-8">
           <router-link
