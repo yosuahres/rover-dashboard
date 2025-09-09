@@ -155,10 +155,10 @@ export function useROS() {
       return;
     }
 
-    // Exclude image topics as per user's example
-    if (topicType === 'sensor_msgs/msg/Image' || topicType === 'sensor_msgs/msg/CompressedImage' || topicType === 'theora_image_transport/msg/Packet') {
-      return;
-    }
+    // if wanted to ignore image topics
+    // if (topicType === 'sensor_msgs/msg/Image' || topicType === 'sensor_msgs/msg/CompressedImage' || topicType === 'theora_image_transport/msg/Packet') {
+    //   return;
+    // }
 
     const subscriber = new ROSLIB.Topic({
       ros: mainStore.ros,
