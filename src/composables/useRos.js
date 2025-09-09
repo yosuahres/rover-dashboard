@@ -1,4 +1,4 @@
-import { readonly } from 'vue';
+import { readonly, computed } from 'vue';
 import ROSLIB from 'roslib';
 import { useMainStore } from '../stores/store';
 
@@ -189,7 +189,7 @@ export function useROS() {
     topics: readonly(mainStore.topics),
     nodes: readonly(mainStore.nodes),
     messages: readonly(mainStore.messages),
-    isConnected: readonly(mainStore.isConnected),
+    isConnected: computed(() => mainStore.isConnected),
     initializeROS,
     updateTopics,
     updateNodes,
