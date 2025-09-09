@@ -63,7 +63,7 @@ const router = useRouter();
 const port = ref<string>('9090');
 
 const mainStore = useMainStore();
-const { initializeROS } = useROS(); 
+const { initializeROS, isConnected } = useROS(); 
 
 onMounted(() => {
   const storedIp = localStorage.getItem('ip');
@@ -92,8 +92,8 @@ const connectRos = () => {
   initializeROS(ip.value, port.value);
 };
 
-watch(() => mainStore.status, (newStatus) => {
-  if (newStatus === 'Connected') {
+watch(isConnected, (newStatus) => {
+  if (newStatus) { // isConnected is a boolean, so true means connected
     router.push('/data');
   }
 });
