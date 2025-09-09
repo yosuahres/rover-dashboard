@@ -4,11 +4,11 @@
 
 ### 1. Clone this repo:
 
-1. Using bash or other terminal
+Using bash or other terminal
 
-   ```
-   git clone https://github.com/yosuahres/rover-dashboard.git
-   ```
+```
+git clone https://github.com/yosuahres/rover-dashboard.git
+```
 
 ### 2. Install Dependencies
 It is encouraged to use **pnpm** so the packages can work properly.
@@ -50,7 +50,28 @@ pnpm tauri build
 ```
 The installer files will be located in `src-tauri/target/release/bundle/`.
 
-### 5. Commit message
+### 5. Install Requirements
+1. Rosbridge
+
+   ```
+   sudo apt install ros-<ROS_DISTRO>-rosbridge-server
+
+   source /opt/ros/<ROS_DISTRO>/setup.bash (or .zsh)
+
+   #launch rosbridge on terminal  
+   ros2 launch rosbridge_server rosbridge_websocket_launch.xml
+   ```
+
+2. Web video server, refer to [this](https://github.com/RobotWebTools/web_video_server).  
+For newer ROS2 distributions (humble, jazzy, rolling) it is possible to install web_video_server as a package:
+    ```
+    sudo apt install ros-${ROS_DISTRO}-web-video-server
+
+    # ROS 2
+    ros2 run web_video_server web_video_server
+    ```
+
+### 6. Commit message
 This project uses the conventional commit specification for better readability and clarity. It is mandatory to use conventional commit messages. Read more about conventional commits [here](https://www.conventionalcommits.org/en/v1.0.0/).
 
 ## ⁉️ author?   
