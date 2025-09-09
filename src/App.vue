@@ -46,7 +46,7 @@
             XX
           </router-link>
         </div>
-        <button class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">
+        <button @click="disconnectRos" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">
           Disconnect
         </button>
       </nav>
@@ -58,6 +58,14 @@
 <script setup>
 import { useROS } from './composables/useRos';
 import ConnectionForm from './components/ConnectionForm.vue';
+import { useMainStore } from './stores/store';
 
 const { status } = useROS();
+const mainStore = useMainStore();
+
+const disconnectRos = () => {
+  if (mainStore.ros) {
+    mainStore.ros.close();
+  }
+};
 </script>
