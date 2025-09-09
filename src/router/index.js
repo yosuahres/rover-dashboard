@@ -3,11 +3,17 @@ import MainView from '../views/MainView.vue';
 import CameraView from '../views/CamView.vue';
 import DebugView from '../views/DebugView.vue';
 import ScienceView from '../views/ScienceView.vue';
+import ConnectionView from '../views/ConnectionView.vue';
 
 const routes = [
   {
     path: '/',
-    redirect: '/data',
+    redirect: '/connect',
+  },
+  {
+    path: '/connect',
+    name: 'Connect',
+    component: ConnectionView,
   },
   {
     path: '/data',
