@@ -80,8 +80,10 @@ const handlePortChange = (e: Event) => {
   port.value = (e.target as HTMLInputElement).value;
 };
 
+
 const connectRos = () => {
-  if (mainStore.ros) {
+  // Only close if connected
+  if (mainStore.ros && mainStore.status === 'Connected') {
     mainStore.ros.close();
     console.log('ROS connection closed');
   }
