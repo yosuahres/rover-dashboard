@@ -22,8 +22,7 @@ export const useMainStore = defineStore('main', {
     robotVelInfoSubscriber: null,
   }),
   getters: {
-    // isConnected: (state) => state.status === 'Connected',
-    isConnected: computed(() => mainStore.isConnected),
+    isConnected: (state) => state.status === 'Connected',
   },
   actions: {
     setRos(rosInstance) {
