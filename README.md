@@ -60,6 +60,9 @@ The installer files will be located in `src-tauri/target/release/bundle/`.
 
    #launch rosbridge on terminal  
    ros2 launch rosbridge_server rosbridge_websocket_launch.xml
+
+   #change to your robot IP
+   ros2 launch rosbridge_server rosbridge_websocket_launch.xml address:=0.0.0.0 port:=9090
    ```
 
 2. Web video server, refer to [this](https://github.com/RobotWebTools/web_video_server).  
@@ -69,6 +72,9 @@ For newer ROS2 distributions (humble, jazzy, rolling) it is possible to install 
 
     # ROS 2
     ros2 run web_video_server web_video_server
+
+    #change to your robot IP
+    ros2 run web_video_server web_video_server --ros-args -p port:=8081 -p address:=localhost -p server_threads:=4
     ```
 
 ### 6. Commit message
