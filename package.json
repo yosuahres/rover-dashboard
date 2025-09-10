@@ -12,6 +12,7 @@
     "tauri": "tauri"
   },
   "dependencies": {
+    "@ken20020209/ros2d": "^0.11.1",
     "@tailwindcss/vite": "^4.1.12",
     "chart.js": "^4.5.0",
     "konva": "^9.3.22",

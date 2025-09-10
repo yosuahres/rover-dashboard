@@ -4,67 +4,36 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue';
-import * as ROS3D from 'ros3d';
 import { useROS } from '../composables/useRos';
+import * as ROS2D from '@ken20020209/ros2d';
 
 const viewerContainer = ref(null);
-let viewer = null;
-let tfClient = null;
-let grid = null;
-let occupancyGridClient = null;
-let pointCloud2 = null;
+let mapViewer = null;
+let mapGridClient = null;
 
 const { ros, isConnected } = useROS();
 
 const initRviz = () => {
   if (viewerContainer.value && ros.value && isConnected.value) {
-    // Initialize the 3D viewer
-    viewer = new ROS3D.Viewer({
+    // Initialize the 2D viewer
+    mapViewer = new ROS2D.Viewer({
       divID: viewerContainer.value.id,
       width: viewerContainer.value.clientWidth,
       height: viewerContainer.value.clientHeight,
-      antialias: true,
-      background: '#333333',
     });
 
-    // Initialize TFClient
-    tfClient = new ROS3D.TFClient({
+    // Setup the map client.
+    mapGridClient = new ROS2D.OccupancyGridClient({
       ros: ros.value,
-      fixedFrame: '/odom',
-      angularThresh: 0.01,
-      transThresh: 0.01,
-      rate: 10.0,
+      rootObject: mapViewer.scene,
+      continuous: true,
     });
 
-    // Add a grid to the viewer
-    grid = new ROS3D.Grid({
-      ros: ros.value,
-      tfClient: tfClient, 
-      size: 10,
-      cellSize: 1,
-      lineWidth: 1,
-      color: 0xcccccc,
+    // Scale the canvas to fit to the map
+    mapGridClient.on('change', () => {
+      mapViewer.scaleToDimensions(mapGridClient.currentGrid.width, mapGridClient.currentGrid.height);
+      mapViewer.shift(mapGridClient.currentGrid.pose.position.x, mapGridClient.currentGrid.pose.position.y);
     });
-    viewer.addObject(grid);
-
-    // Add an OccupancyGrid display for SLAM maps
-    occupancyGridClient = new ROS3D.OccupancyGrid({
-      ros: ros.value,
-      tfClient: tfClient,
-      topic: '/map',
-      color: 0x0062ff, 
-      opacity: 0.7,
-    });
-    viewer.addObject(occupancyGridClient);
-
-    // Add a PointCloud2 display for lidar data
-    pointCloud2 = new ROS3D.PointCloud2({
-      ros: ros.value,
-      tfClient: tfClient,
-      topic: '/camera/depth/points', // !CHANGEDTHIS
-      material: { size: 0.05, color: 0xff00ff },
-    });
-    viewer.addObject(pointCloud2);
 
     // Handle window resize
     window.addEventListener('resize', resizeViewer);
@@ -72,41 +41,32 @@ const initRviz = () => {
 };
 
 const resizeViewer = () => {
-  if (viewer && viewerContainer.value) {
-    viewer.resize(viewerContainer.value.clientWidth, viewerContainer.value.clientHeight);
+  if (mapViewer && viewerContainer.value) {
+    mapViewer.resize(viewerContainer.value.clientWidth, viewerContainer.value.clientHeight);
   }
 };
 
 const destroyRviz = () => {
-  if (viewer) {
-    viewer.destroy();
-    viewer = null;
+  if (mapViewer) {
+    document.getElementById(viewerContainer.value.id).innerHTML = ''; // Clears the map div
+    mapViewer = null;
   }
-  if (tfClient) {
-    tfClient.unsubscribe();
-    tfClient = null;
-  }
-  if (grid) {
-    grid = null;
-  }
-  if (occupancyGridClient) {
-    occupancyGridClient = null;
-  }
-  if (pointCloud2) {
-    pointCloud2 = null;
+  if (mapGridClient) {
+    mapGridClient.unsubscribe();
+    mapGridClient = null;
   }
   window.removeEventListener('resize', resizeViewer);
 };
 
 onMounted(() => {
-  // Ensure the container has an ID for ROS3D.Viewer
+  // Ensure the container has an ID for ROS2D.Viewer
   if (viewerContainer.value) {
-    viewerContainer.value.id = 'rviz-slam-viewer-container';
+    viewerContainer.value.id = 'map';
   }
   watch([ros, isConnected], ([newRos, newIsConnected]) => {
-    if (newRos && newIsConnected && !viewer) {
+    if (newRos && newIsConnected && !mapViewer) {
       initRviz();
-    } else if ((!newRos || !newIsConnected) && viewer) {
+    } else if ((!newRos || !newIsConnected) && mapViewer) {
       destroyRviz();
     }
   }, { immediate: true });
