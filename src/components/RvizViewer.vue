@@ -11,7 +11,7 @@ const viewerContainer = ref(null);
 let viewer = null;
 let tfClient = null;
 let grid = null;
-let urdf = null;
+let urdfClient = null;
 
 const { ros, isConnected } = useROS();
 
@@ -23,39 +23,34 @@ const initRviz = () => {
       width: viewerContainer.value.clientWidth,
       height: viewerContainer.value.clientHeight,
       antialias: true,
-      background: '#333333',
-    });
-
-    // Initialize TFClient
-    tfClient = new ROS3D.TFClient({
-      ros: ros.value,
-      fixedFrame: '/odom',
-      angularThresh: 0.01,
-      transThresh: 0.01,
-      rate: 10.0,
+      background: '#cccccc', 
+      fixedFrame: 'odom' //reference frame
     });
 
     // Add a grid to the viewer
-    grid = new ROS3D.Grid({
-      ros: ros.value,
-      tfClient: tfClient, 
-      size: 10,
-      cellSize: 1,
-      lineWidth: 1,
-      color: 0xcccccc,
-    });
-    viewer.addObject(grid);
+    viewer.addObject(new ROS3D.Grid({ 
+      color:'#0181c4', 
+      cellSize: 0.5, 
+      num_cells: 20
+    }));
 
-    // Add a URDF model to the viewer
-    urdf = new ROS3D.UrdfModel({
+    // Initialize TFClient
+    tfClient = new ROSLIB.TFClient({ 
       ros: ros.value,
-      tfClient: tfClient,
-      path: `http://${ros.value.url.split('ws://')[1].split(':')[0]}:9090/urdf/`, 
-      color: 0x00ff00,
-      opacity: 1.0,
-      collision: false,
+      angularThres: 0.01, 
+      transThres: 0.01, 
+      rate: 10.0,
     });
-    viewer.addObject(urdf);
+
+    // Setup the URDF client.
+    urdfClient = new ROS3D.UrdfClient({ 
+      ros: ros.value,
+      param: 'robot_description', 
+      tfClient: tfClient,
+      path: location.origin + location.pathname, 
+      rootObject: viewer.scene, 
+      loader: ROS3D.COLLADA_LOADER_2 
+    });
 
     // Handle window resize
     window.addEventListener('resize', resizeViewer);
@@ -80,8 +75,8 @@ const destroyRviz = () => {
   if (grid) {
     grid = null;
   }
-  if (urdf) {
-    urdf = null;
+  if (urdfClient) { // Changed to urdfClient
+    urdfClient = null;
   }
   window.removeEventListener('resize', resizeViewer);
 };
