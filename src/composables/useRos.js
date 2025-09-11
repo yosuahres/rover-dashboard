@@ -13,17 +13,21 @@ export function useROS() {
 
   function initializeROS(ip, port) {
     const url = `ws://${ip}:${port}`;
+    console.log(`Attempting to connect to ROS at: ${url}`);
     mainStore.setLoading(true);
     mainStore.setServer(ip);
+    mainStore.setStatus(null); // Reset status on new connection attempt
 
     const rosConnection = new ROSLIB.Ros({ url });
 
     mainStore.setRos(rosConnection);
+    console.log('ROS instance set in store:', mainStore.ros);
 
     rosConnection.on('connection', () => {
       mainStore.setMessage(`Connected to ROS master: ${url}`);
       mainStore.setLoading(false);
       mainStore.setStatus('Connected');
+      console.log('ROS connection successful. isConnected:', mainStore.isConnected);
       initializeRosTopics(rosConnection);
     });
 
@@ -32,6 +36,7 @@ export function useROS() {
       mainStore.setLoading(false);
       mainStore.setStatus('Disconnected');
       console.error('ROS connection error:', error);
+      console.log('ROS connection failed. isConnected:', mainStore.isConnected);
     });
 
     rosConnection.on('close', () => {
@@ -39,6 +44,7 @@ export function useROS() {
       mainStore.setMessage(`Closed connection to ROS master: ${url}`);
       mainStore.setLoading(false);
       mainStore.clearAllRosData();
+      console.log('ROS connection closed. isConnected:', mainStore.isConnected);
     });
   }
 
