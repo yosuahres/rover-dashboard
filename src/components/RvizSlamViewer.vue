@@ -83,9 +83,15 @@ onMounted(() => {
   }
   watch([ros, isConnected], ([newRos, newIsConnected]) => {
     console.log('ROS or isConnected changed. newRos:', newRos, 'newIsConnected:', newIsConnected, 'mapViewer exists:', !!mapViewer);
-    if (newRos && newIsConnected && !mapViewer) {
-      initRviz();
-    } else if ((!newRos || !newIsConnected) && mapViewer) {
+    if (newRos && newIsConnected) { // If connected, try to initialize
+      if (!mapViewer) { // Only initialize if not already initialized
+        console.log('Connection established and mapViewer not initialized. Calling initRviz().');
+        initRviz();
+      } else {
+        console.log('Connection established but mapViewer already exists. Skipping initRviz().');
+      }
+    } else { // If not connected, destroy
+      console.log('Connection lost or not established. Calling destroyRviz().');
       destroyRviz();
     }
   }, { immediate: true });
