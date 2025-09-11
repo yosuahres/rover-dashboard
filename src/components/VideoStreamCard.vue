@@ -1,5 +1,8 @@
 <template>
-  <div class="border border-gray-300 rounded-lg shadow-md p-4 flex flex-col h-full">
+  <div
+    :class="['border', 'rounded-lg', 'shadow-md', 'p-4', 'flex', 'flex-col', 'h-full', 'cursor-pointer', { 'border-indigo-500 ring-2 ring-indigo-500': isSelected, 'border-gray-300': !isSelected }]"
+    @click="selectCard"
+  >
     <div class="flex justify-between items-center mb-3">
       <h2 class="text-lg font-semibold text-gray-800">{{ cardTitle }}</h2>
       <button @click="toggleInputForm" class="p-1 rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
@@ -40,7 +43,17 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  cardId: {
+    type: String,
+    required: true,
+  },
+  isSelected: {
+    type: Boolean,
+    default: false,
+  },
 });
+
+const emit = defineEmits(['card-selected']);
 
 const mainStore = useMainStore();
 const { uid: _uid } = getCurrentInstance(); // For unique IDs in template
@@ -50,6 +63,10 @@ const showInputForm = ref(true);
 
 const toggleInputForm = () => {
   showInputForm.value = !showInputForm.value;
+};
+
+const selectCard = () => {
+  emit('card-selected', props.cardId);
 };
 
 const videoStreamUrl = computed(() => {
