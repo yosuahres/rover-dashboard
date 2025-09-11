@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen w-full flex flex-col bg-gray-100">
-    <nav class="bg-gray-100 p-4 flex items-center justify-between px-6">
-    <!-- <nav v-if="isConnected" class="bg-gray-100 p-4 flex items-center justify-between px-6"> -->
+    <!-- <nav class="bg-gray-100 p-4 flex items-center justify-between px-6"> -->
+    <nav v-if="isConnected" class="bg-gray-100 p-4 flex items-center justify-between px-6">
       <div class="flex flex-grow justify-evenly mr-8">
         <router-link
           to="/data"
@@ -53,13 +53,28 @@
 </template>
 
 <script setup>
+import { onMounted, watch } from 'vue';
 import { useROS } from './composables/useRos';
 import { useMainStore } from './stores/store';
 import { useRouter } from 'vue-router';
 
-const { isConnected } = useROS();
+const { isConnected, initializeROS, initializeRosTopics } = useROS();
 const mainStore = useMainStore();
 const router = useRouter();
+
+onMounted(() => {
+  const storedIp = localStorage.getItem('ip');
+  const storedPort = localStorage.getItem('port');
+  if (storedIp && storedPort && !mainStore.ros) {
+    initializeROS(storedIp, storedPort);
+  }
+});
+
+watch(() => mainStore.ros, (newRosInstance) => {
+  if (newRosInstance && mainStore.isConnected) {
+    initializeRosTopics(newRosInstance);
+  }
+});
 
 const disconnectRos = () => {
   if (mainStore.ros) {
