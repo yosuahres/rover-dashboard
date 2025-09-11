@@ -1,9 +1,15 @@
-import { readonly, computed } from 'vue';
+import { ref, readonly, computed, watch } from 'vue'; // Added ref and watch
 import ROSLIB from 'roslib';
 import { useMainStore } from '../stores/store';
 
 export function useROS() {
   const mainStore = useMainStore();
+  const rosRef = ref(null); // Local ref for ROS instance
+
+  // Watch for changes in mainStore.ros and update rosRef
+  watch(() => mainStore.ros, (newRos) => {
+    rosRef.value = newRos;
+  }, { immediate: true });
 
   function initializeROS(ip, port) {
     const url = `ws://${ip}:${port}`;
@@ -207,7 +213,7 @@ export function useROS() {
   }
 
   return {
-    ros: readonly(mainStore.ros),
+    ros: readonly(rosRef), // Return the local reactive ref
     loading: readonly(mainStore.loading),
     server: readonly(mainStore.server),
     status: readonly(mainStore.status),
