@@ -13,9 +13,10 @@
         type="range"
         id="fps-slider"
         min="1"
-        max="30"
+        max="60"
         v-model="fps"
         class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+        @change="updateCameraParam('fps', fps)"
       />
       <span class="text-sm text-gray-600">{{ fps }} FPS</span>
     </div>
@@ -29,8 +30,79 @@
         max="100"
         v-model="brightness"
         class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+        @change="updateCameraParam('brightness', brightness / 100.0)"
       />
       <span class="text-sm text-gray-600">{{ brightness }}%</span>
+    </div>
+
+    <div class="mb-4">
+      <label for="contrast-slider" class="block text-sm font-medium text-gray-700 mb-1">Contrast:</label>
+      <input
+        type="range"
+        id="contrast-slider"
+        min="0"
+        max="100"
+        v-model="contrast"
+        class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+        @change="updateCameraParam('contrast', contrast / 100.0)"
+      />
+      <span class="text-sm text-gray-600">{{ contrast }}%</span>
+    </div>
+
+    <div class="mb-4">
+      <label for="saturation-slider" class="block text-sm font-medium text-gray-700 mb-1">Saturation:</label>
+      <input
+        type="range"
+        id="saturation-slider"
+        min="0"
+        max="100"
+        v-model="saturation"
+        class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+        @change="updateCameraParam('saturation', saturation / 100.0)"
+      />
+      <span class="text-sm text-gray-600">{{ saturation }}%</span>
+    </div>
+
+    <div class="mb-4">
+      <label for="hue-slider" class="block text-sm font-medium text-gray-700 mb-1">Hue:</label>
+      <input
+        type="range"
+        id="hue-slider"
+        min="0"
+        max="100"
+        v-model="hue"
+        class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+        @change="updateCameraParam('hue', hue / 100.0)"
+      />
+      <span class="text-sm text-gray-600">{{ hue }}%</span>
+    </div>
+
+    <div class="mb-4">
+      <label for="gain-slider" class="block text-sm font-medium text-gray-700 mb-1">Gain:</label>
+      <input
+        type="range"
+        id="gain-slider"
+        min="0"
+        max="100"
+        v-model="gain"
+        class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+        @change="updateCameraParam('gain', gain / 100.0)"
+      />
+      <span class="text-sm text-gray-600">{{ gain }}%</span>
+    </div>
+
+    <div class="mb-4">
+      <label for="exposure-slider" class="block text-sm font-medium text-gray-700 mb-1">Exposure:</label>
+      <input
+        type="range"
+        id="exposure-slider"
+        min="0"
+        max="100"
+        v-model="exposure"
+        class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+        @change="updateCameraParam('exposure', exposure / 100.0)"
+      />
+      <span class="text-sm text-gray-600">{{ exposure }}%</span>
     </div>
 
     <button
@@ -55,56 +127,45 @@ const props = defineProps({
 
 const emit = defineEmits(['close-controller']);
 
-const { ros, isConnected } = useROS();
+const { ros, isConnected, setRosParameter } = useROS();
 
-const fps = ref(15);
-const brightness = ref(50);
+const fps = ref(30); // Default to 30 FPS
+const brightness = ref(50); // Default to 50%
+const contrast = ref(50);
+const saturation = ref(50);
+const hue = ref(50);
+const gain = ref(50);
+const exposure = ref(50);
 
 // Watch for changes in selectedCardId to potentially load settings or reset
 watch(() => props.selectedCardId, (newId) => {
   console.log(`Controller selected for: ${newId}`);
   // In a real application, you would fetch current settings for newId here
   // For now, we'll just reset to default or some arbitrary values
-  fps.value = 15;
+  fps.value = 30;
   brightness.value = 50;
+  contrast.value = 50;
+  saturation.value = 50;
+  hue.value = 50;
+  gain.value = 50;
+  exposure.value = 50;
 });
 
-const applySettings = () => {
+const updateCameraParam = (paramName, value) => {
   if (!isConnected.value) {
     console.error('Not connected to ROS. Cannot apply settings.');
     return;
   }
+  const nodeName = 'camera_publisher_node'; // Your ROS node name
+  setRosParameter(nodeName, paramName, value);
+};
 
-  console.log(`Applying settings for ${props.selectedCardId}: FPS=${fps.value}, Brightness=${brightness.value}`);
-
-  // !TOBECHANGE: Implement actual ROS communication here
-  // This is a placeholder for how you might publish to a topic or call a service
-  // Example: Publishing to a topic (replace with actual topic and message type)
-  // const cameraSettingsPublisher = new ROSLIB.Topic({
-  //   ros: ros.value,
-  //   name: `/camera/${props.selectedCardId}/settings`, // Example topic
-  //   messageType: 'std_msgs/String', // Example message type
-  // });
-  // const message = new ROSLIB.Message({
-  //   data: JSON.stringify({ fps: fps.value, brightness: brightness.value }),
-  // });
-  // cameraSettingsPublisher.publish(message);
-
-  // Example: Calling a ROS service (replace with actual service name and type)
-  // const setCameraSettingsClient = new ROSLIB.Service({
-  //   ros: ros.value,
-  //   name: `/camera/${props.selectedCardId}/set_settings`, // Example service
-  //   serviceType: 'your_package/SetCameraSettings', // Example service type
-  // });
-  // const request = new ROSLIB.ServiceRequest({
-  //   fps: fps.value,
-  //   brightness: brightness.value,
-  // });
-  // setCameraSettingsClient.callService(request, (result) => {
-  //   console.log('Service response: ' + result.success);
-  // });
-
-  alert(`Settings applied for ${props.selectedCardId}: FPS=${fps.value}, Brightness=${brightness.value}`);
+const applySettings = () => {
+  // The settings are applied on @change event of each slider,
+  // so this button can be used for a final "sync" or just as a visual cue.
+  // For now, we'll just log that settings are "applied".
+  console.log(`All settings for ${props.selectedCardId} are being updated via individual controls.`);
+  alert(`Settings applied for ${props.selectedCardId}`);
 };
 
 const closeController = () => {

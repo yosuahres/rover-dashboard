@@ -79,7 +79,7 @@ watch(() => mainStore.ros, (newRosInstance) => {
 const disconnectRos = () => {
   if (mainStore.ros) {
     mainStore.ros.close();
-    router.push('/connect'); // Navigate to the connection page on disconnect
+    router.push('/connect'); 
   }
 };
 </script>

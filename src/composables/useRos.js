@@ -180,6 +180,32 @@ export function useROS() {
     mainStore.setMessage(`Unsubscribed from topic: ${topicName}`);
   }
 
+  function setRosParameter(nodeName, paramName, paramValue) {
+    if (!mainStore.ros || !mainStore.isConnected) {
+      console.error("ROS not connected. Cannot set parameter.");
+      return;
+    }
+
+    const setParamClient = new ROSLIB.Service({
+      ros: mainStore.ros,
+      name: '/rosapi/set_param',
+      serviceType: 'rosapi/SetParam'
+    });
+
+    const request = new ROSLIB.ServiceRequest({
+      name: `/${nodeName}/${paramName}`,
+      value: JSON.stringify(paramValue)
+    });
+
+    setParamClient.call(request, function(result) {
+      console.log(`Parameter ${paramName} set to ${paramValue}:`, result);
+      mainStore.setMessage(`Parameter ${paramName} set to ${paramValue}`);
+    }, function(error) {
+      console.error(`Error setting parameter ${paramName}:`, error);
+      mainStore.setMessage(`Error setting parameter ${paramName}: ${error.message || error}`);
+    });
+  }
+
   return {
     ros: readonly(mainStore.ros),
     loading: readonly(mainStore.loading),
@@ -195,6 +221,7 @@ export function useROS() {
     updateNodes,
     subscribeToTopic,
     unsubscribeFromTopic,
+    setRosParameter, // Expose this function
     initializeRosTopics, // Expose this function
   };
 }
