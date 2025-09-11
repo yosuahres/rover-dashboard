@@ -34,7 +34,7 @@
         <button
           type="submit"
           :disabled="mainStore.loading"
-          class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full disabled:opacity-50"
+          class="!bg-green-500 !hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full disabled:opacity-50"
         >
           {{ mainStore.loading ? 'Connecting...' : 'Connect' }}
         </button>

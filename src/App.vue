@@ -44,7 +44,7 @@
           XX
         </router-link>
       </div>
-      <button @click="disconnectRos" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">
+      <button @click="disconnectRos" class="!bg-red-500 !hover:bg-red-600 text-white font-bold py-2 px-4 rounded">
         Disconnect
       </button>
     </nav>

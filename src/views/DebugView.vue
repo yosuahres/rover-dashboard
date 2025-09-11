@@ -29,8 +29,8 @@
             </div>
 
             <div class="flex space-x-2 mt-6">
-              <button @click="onSaveConfiguration" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">Apply</button>
-              <button @click="onResetConfig" class="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600">Reset</button>
+              <button @click="onSaveConfiguration" class="px-4 py-2 !bg-green-500 text-white rounded-md !hover:bg-green-600">Apply</button>
+              <button @click="onResetConfig" class="px-4 py-2 !bg-yellow-500 text-white rounded-md !hover:bg-yellow-600">Reset</button>
             </div>
           </div>
         </div>
