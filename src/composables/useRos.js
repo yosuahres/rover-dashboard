@@ -198,23 +198,20 @@ export function useROS() {
       return;
     }
 
-    const setParamClient = new ROSLIB.Service({
+    // ROS 2 parameters are typically accessed directly via ROSLIB.Param
+    // The parameter name should be fully qualified, including the node name.
+    const fullParamName = `/${nodeName}/${paramName}`;
+    const rosParam = new ROSLIB.Param({
       ros: mainStore.ros,
-      name: '/rosapi/set_param',
-      serviceType: 'rosapi/SetParam'
+      name: fullParamName
     });
 
-    const request = new ROSLIB.ServiceRequest({
-      name: `/${nodeName}/${paramName}`,
-      value: JSON.stringify(paramValue)
-    });
-
-    setParamClient.call(request, function(result) {
-      console.log(`Parameter ${paramName} set to ${paramValue}:`, result);
-      mainStore.setMessage(`Parameter ${paramName} set to ${paramValue}`);
+    rosParam.set(paramValue, function() {
+      console.log(`Parameter ${fullParamName} set to ${paramValue}.`);
+      mainStore.setMessage(`Parameter ${fullParamName} set to ${paramValue}`);
     }, function(error) {
-      console.error(`Error setting parameter ${paramName}:`, error);
-      mainStore.setMessage(`Error setting parameter ${paramName}: ${error.message || error}`);
+      console.error(`Error setting parameter ${fullParamName}:`, error);
+      mainStore.setMessage(`Error setting parameter ${fullParamName}: ${error.message || error}`);
     });
   }
 
