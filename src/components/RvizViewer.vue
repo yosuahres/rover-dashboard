@@ -15,6 +15,7 @@ let tfClient = null;
 let grid = null;
 let urdfClient = null;
 let occupancyGridClient = null; // Added occupancyGridClient
+let mapTopic = null; // Added mapTopic for debugging
 
 const { ros, isConnected } = useROS();
 
@@ -63,6 +64,20 @@ const initRviz = () => {
       continuous: true
     });
 
+    // Debugging: Add a ROSLIB.Topic listener for /map
+    mapTopic = new ROSLIB.Topic({
+      ros: ros.value,
+      name: '/map',
+      messageType: 'nav_msgs/OccupancyGrid'
+    });
+
+    mapTopic.subscribe((message) => {
+      console.log('Received /map message:', message);
+      if (!message || !message.info) {
+        console.error('Received /map message is undefined or missing info property:', message);
+      }
+    });
+
     // Handle window resize
     window.addEventListener('resize', resizeViewer);
   }
@@ -104,6 +119,10 @@ const destroyRviz = () => {
   }
   if (occupancyGridClient) {
     occupancyGridClient = null;
+  }
+  if (mapTopic) {
+    mapTopic.unsubscribe();
+    mapTopic = null;
   }
   window.removeEventListener('resize', resizeViewer);
 };
