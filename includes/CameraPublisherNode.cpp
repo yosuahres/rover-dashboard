@@ -97,11 +97,19 @@ private:
     }
 
     void on_parameter_event(const rcl_interfaces::msg::ParameterEvent::SharedPtr event) {
+        RCLCPP_INFO(this->get_logger(), "Received parameter event from node: %s", event->node.c_str());
         // Filter for events from this node
-        if (event->node == this->get_name()) {
-            for (const auto& changed_parameter : event->changed_parameters) {
+        // The event->node might not be this node's name when parameters are set via rosbridge.
+        // Instead, we check if the changed parameter's name starts with this node's name.
+        std::string node_name_prefix = "/" + std::string(this->get_name()) + "/";
+
+        for (const auto& changed_parameter : event->changed_parameters) {
+            if (changed_parameter.name.rfind(node_name_prefix, 0) == 0) { // Check if parameter name starts with node_name_prefix
                 bool success;
-                if (changed_parameter.name == "fps") {
+                // Extract the actual parameter name without the node prefix
+                std::string param_name_only = changed_parameter.name.substr(node_name_prefix.length());
+
+                if (param_name_only == "fps") {
                     double new_fps = changed_parameter.value.double_value;
                     success = cap.set(cv::CAP_PROP_FPS, new_fps);
                     setup_timer(new_fps); // Recreate timer with new period
