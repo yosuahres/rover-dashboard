@@ -20,15 +20,9 @@
       </div>
     </div>
 
-    <div class="flex flex-col md:flex-row gap-2 mt-4 h-[calc(100vh-200px)]">
-      <div class="md:w-1/2 p-4 border rounded-lg shadow-md bg-white">
-        <h2 class="text-xl text-black font-semibold mb-4">URDF Visualization</h2>
-        <div class="h-[calc(100%-40px)]">
-          <RvizViewer />
-        </div>
-      </div>
-      <div class="md:w-1/2 p-4 border rounded-lg shadow-md bg-white">
-        <h2 class="text-xl text-black font-semibold mb-4">SLAM Visualization</h2>
+    <div class="flex flex-col gap-2 mt-4 h-[calc(100vh-200px)]">
+      <div class="p-4 border rounded-lg shadow-md bg-white h-full">
+        <h2 class="text-xl text-black font-semibold mb-4">Rviz Visualization</h2>
         <div class="h-[calc(100%-40px)]">
           <RvizViewer />
         </div>

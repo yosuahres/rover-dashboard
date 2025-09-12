@@ -6,6 +6,7 @@
 import { ref, onMounted, onUnmounted, watch } from 'vue';
 import * as ROS3D from 'ros3d';
 import * as THREE from 'three'; // Added THREE import
+import * as ROSLIB from 'roslib'; // Added ROSLIB import
 import { useROS } from '../composables/useRos';
 
 const viewerContainer = ref(null);
