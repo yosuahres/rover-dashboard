@@ -5,6 +5,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue';
 import * as ROS3D from 'ros3d';
+import * as THREE from 'three'; // Added THREE import
 import { useROS } from '../composables/useRos';
 
 const viewerContainer = ref(null);
@@ -12,6 +13,7 @@ let viewer = null;
 let tfClient = null;
 let grid = null;
 let urdfClient = null;
+let occupancyGridClient = null; // Added occupancyGridClient
 
 const { ros, isConnected } = useROS();
 
@@ -52,6 +54,14 @@ const initRviz = () => {
       loader: ROS3D.COLLADA_LOADER_2 
     });
 
+    // Setup the OccupancyGrid client.
+    occupancyGridClient = new ROS3D.OccupancyGrid({
+      ros: ros.value,
+      topic: '/map',
+      rootObject: viewer.scene,
+      continuous: true
+    });
+
     // Handle window resize
     window.addEventListener('resize', resizeViewer);
   }
@@ -65,7 +75,20 @@ const resizeViewer = () => {
 
 const destroyRviz = () => {
   if (viewer) {
-    viewer.destroy();
+    // Dispose of Three.js resources
+    viewer.scene.traverse((object) => {
+      if (object.geometry) object.geometry.dispose();
+      if (object.material) {
+        if (Array.isArray(object.material)) {
+          object.material.forEach(material => material.dispose());
+        } else {
+          object.material.dispose();
+        }
+      }
+      if (object.texture) object.texture.dispose();
+    });
+    viewer.renderer.dispose();
+    document.getElementById(viewerContainer.value.id).innerHTML = ''; // Clears the div
     viewer = null;
   }
   if (tfClient) {
@@ -75,8 +98,11 @@ const destroyRviz = () => {
   if (grid) {
     grid = null;
   }
-  if (urdfClient) { // Changed to urdfClient
+  if (urdfClient) {
     urdfClient = null;
+  }
+  if (occupancyGridClient) {
+    occupancyGridClient = null;
   }
   window.removeEventListener('resize', resizeViewer);
 };

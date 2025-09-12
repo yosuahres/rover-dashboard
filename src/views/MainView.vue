@@ -30,7 +30,7 @@
       <div class="md:w-1/2 p-4 border rounded-lg shadow-md bg-white">
         <h2 class="text-xl text-black font-semibold mb-4">SLAM Visualization</h2>
         <div class="h-[calc(100%-40px)]">
-          <RvizSlamViewer />
+          <RvizViewer />
         </div>
       </div>
     </div>
@@ -83,7 +83,6 @@ import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { useMainStore } from '../stores/store.js';
 import { useROS } from '../composables/useRos.js';
 import RvizViewer from '../components/RvizViewer.vue';
-import RvizSlamViewer from '../components/RvizSlamViewer.vue';
 
 const mainStore = useMainStore();
 const {
