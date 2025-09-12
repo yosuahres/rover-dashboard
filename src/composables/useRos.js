@@ -200,7 +200,7 @@ export function useROS() {
 
     // ROS 2 parameters are typically accessed directly via ROSLIB.Param
     // rosbridge_websocket expects parameter names in the format "node_name;param_name"
-    const rosParamName = `${nodeName};${paramName}`;
+    const rosParamName = `${nodeName}:${paramName}`;
     const rosParam = new ROSLIB.Param({
       ros: mainStore.ros,
       name: rosParamName
