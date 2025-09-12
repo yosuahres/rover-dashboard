@@ -199,19 +199,19 @@ export function useROS() {
     }
 
     // ROS 2 parameters are typically accessed directly via ROSLIB.Param
-    // The parameter name should be fully qualified, including the node name.
-    const fullParamName = `/${nodeName}/${paramName}`;
+    // rosbridge_websocket expects parameter names in the format "node_name;param_name"
+    const rosParamName = `${nodeName};${paramName}`;
     const rosParam = new ROSLIB.Param({
       ros: mainStore.ros,
-      name: fullParamName
+      name: rosParamName
     });
 
     rosParam.set(paramValue, function() {
-      console.log(`Parameter ${fullParamName} set to ${paramValue}.`);
-      mainStore.setMessage(`Parameter ${fullParamName} set to ${paramValue}`);
+      console.log(`Parameter ${rosParamName} set to ${paramValue}.`);
+      mainStore.setMessage(`Parameter ${rosParamName} set to ${paramValue}`);
     }, function(error) {
-      console.error(`Error setting parameter ${fullParamName}:`, error);
-      mainStore.setMessage(`Error setting parameter ${fullParamName}: ${error.message || error}`);
+      console.error(`Error setting parameter ${rosParamName}:`, error);
+      mainStore.setMessage(`Error setting parameter ${rosParamName}: ${error.message || error}`);
     });
   }
 
