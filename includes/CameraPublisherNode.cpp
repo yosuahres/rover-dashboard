@@ -44,13 +44,21 @@ public:
 
 private:
     void apply_camera_parameters() {
-        cap.set(cv::CAP_PROP_FPS, this->get_parameter("fps").as_double());
-        cap.set(cv::CAP_PROP_BRIGHTNESS, this->get_parameter("brightness").as_double());
-        cap.set(cv::CAP_PROP_CONTRAST, this->get_parameter("contrast").as_double());
-        cap.set(cv::CAP_PROP_SATURATION, this->get_parameter("saturation").as_double());
-        cap.set(cv::CAP_PROP_HUE, this->get_parameter("hue").as_double());
-        cap.set(cv::CAP_PROP_GAIN, this->get_parameter("gain").as_double());
-        cap.set(cv::CAP_PROP_EXPOSURE, this->get_parameter("exposure").as_double());
+        bool success;
+        success = cap.set(cv::CAP_PROP_FPS, this->get_parameter("fps").as_double());
+        RCLCPP_INFO(this->get_logger(), "Setting FPS to %f: %s", this->get_parameter("fps").as_double(), success ? "SUCCESS" : "FAILED");
+        success = cap.set(cv::CAP_PROP_BRIGHTNESS, this->get_parameter("brightness").as_double());
+        RCLCPP_INFO(this->get_logger(), "Setting BRIGHTNESS to %f: %s", this->get_parameter("brightness").as_double(), success ? "SUCCESS" : "FAILED");
+        success = cap.set(cv::CAP_PROP_CONTRAST, this->get_parameter("contrast").as_double());
+        RCLCPP_INFO(this->get_logger(), "Setting CONTRAST to %f: %s", this->get_parameter("contrast").as_double(), success ? "SUCCESS" : "FAILED");
+        success = cap.set(cv::CAP_PROP_SATURATION, this->get_parameter("saturation").as_double());
+        RCLCPP_INFO(this->get_logger(), "Setting SATURATION to %f: %s", this->get_parameter("saturation").as_double(), success ? "SUCCESS" : "FAILED");
+        success = cap.set(cv::CAP_PROP_HUE, this->get_parameter("hue").as_double());
+        RCLCPP_INFO(this->get_logger(), "Setting HUE to %f: %s", this->get_parameter("hue").as_double(), success ? "SUCCESS" : "FAILED");
+        success = cap.set(cv::CAP_PROP_GAIN, this->get_parameter("gain").as_double());
+        RCLCPP_INFO(this->get_logger(), "Setting GAIN to %f: %s", this->get_parameter("gain").as_double(), success ? "SUCCESS" : "FAILED");
+        success = cap.set(cv::CAP_PROP_EXPOSURE, this->get_parameter("exposure").as_double());
+        RCLCPP_INFO(this->get_logger(), "Setting EXPOSURE to %f: %s", this->get_parameter("exposure").as_double(), success ? "SUCCESS" : "FAILED");
         RCLCPP_INFO(this->get_logger(), "Applied initial camera parameters.");
     }
 
@@ -59,11 +67,12 @@ private:
             timer_->cancel(); // Cancel existing timer if any
         }
         if (fps > 0) {
+            long long period_ms = static_cast<long long>(1000.0 / fps);
             timer_ = this->create_wall_timer(
-                std::chrono::milliseconds(static_cast<int>(1000.0 / fps)),
+                std::chrono::milliseconds(period_ms),
                 std::bind(&CameraPublisherNode::timer_callback, this)
             );
-            RCLCPP_INFO(this->get_logger(), "Timer set to %f FPS.", fps);
+            RCLCPP_INFO(this->get_logger(), "Timer set to %f FPS (period: %lld ms).", fps, period_ms);
         } else {
             RCLCPP_WARN(this->get_logger(), "FPS is zero or negative, timer not started.");
         }
@@ -91,29 +100,30 @@ private:
         // Filter for events from this node
         if (event->node == this->get_name()) {
             for (const auto& changed_parameter : event->changed_parameters) {
+                bool success;
                 if (changed_parameter.name == "fps") {
                     double new_fps = changed_parameter.value.double_value;
-                    cap.set(cv::CAP_PROP_FPS, new_fps);
+                    success = cap.set(cv::CAP_PROP_FPS, new_fps);
                     setup_timer(new_fps); // Recreate timer with new period
-                    RCLCPP_INFO(this->get_logger(), "FPS changed to %f", new_fps);
+                    RCLCPP_INFO(this->get_logger(), "FPS changed to %f: %s", new_fps, success ? "SUCCESS" : "FAILED");
                 } else if (changed_parameter.name == "brightness") {
-                    cap.set(cv::CAP_PROP_BRIGHTNESS, changed_parameter.value.double_value);
-                    RCLCPP_INFO(this->get_logger(), "Brightness changed to %f", changed_parameter.value.double_value);
+                    success = cap.set(cv::CAP_PROP_BRIGHTNESS, changed_parameter.value.double_value);
+                    RCLCPP_INFO(this->get_logger(), "Brightness changed to %f: %s", changed_parameter.value.double_value, success ? "SUCCESS" : "FAILED");
                 } else if (changed_parameter.name == "contrast") {
-                    cap.set(cv::CAP_PROP_CONTRAST, changed_parameter.value.double_value);
-                    RCLCPP_INFO(this->get_logger(), "Contrast changed to %f", changed_parameter.value.double_value);
+                    success = cap.set(cv::CAP_PROP_CONTRAST, changed_parameter.value.double_value);
+                    RCLCPP_INFO(this->get_logger(), "Contrast changed to %f: %s", changed_parameter.value.double_value, success ? "SUCCESS" : "FAILED");
                 } else if (changed_parameter.name == "saturation") {
-                    cap.set(cv::CAP_PROP_SATURATION, changed_parameter.value.double_value);
-                    RCLCPP_INFO(this->get_logger(), "Saturation changed to %f", changed_parameter.value.double_value);
+                    success = cap.set(cv::CAP_PROP_SATURATION, changed_parameter.value.double_value);
+                    RCLCPP_INFO(this->get_logger(), "Saturation changed to %f: %s", changed_parameter.value.double_value, success ? "SUCCESS" : "FAILED");
                 } else if (changed_parameter.name == "hue") {
-                    cap.set(cv::CAP_PROP_HUE, changed_parameter.value.double_value);
-                    RCLCPP_INFO(this->get_logger(), "Hue changed to %f", changed_parameter.value.double_value);
+                    success = cap.set(cv::CAP_PROP_HUE, changed_parameter.value.double_value);
+                    RCLCPP_INFO(this->get_logger(), "Hue changed to %f: %s", changed_parameter.value.double_value, success ? "SUCCESS" : "FAILED");
                 } else if (changed_parameter.name == "gain") {
-                    cap.set(cv::CAP_PROP_GAIN, changed_parameter.value.double_value);
-                    RCLCPP_INFO(this->get_logger(), "Gain changed to %f", changed_parameter.value.double_value);
+                    success = cap.set(cv::CAP_PROP_GAIN, changed_parameter.value.double_value);
+                    RCLCPP_INFO(this->get_logger(), "Gain changed to %f: %s", changed_parameter.value.double_value, success ? "SUCCESS" : "FAILED");
                 } else if (changed_parameter.name == "exposure") {
-                    cap.set(cv::CAP_PROP_EXPOSURE, changed_parameter.value.double_value);
-                    RCLCPP_INFO(this->get_logger(), "Exposure changed to %f", changed_parameter.value.double_value);
+                    success = cap.set(cv::CAP_PROP_EXPOSURE, changed_parameter.value.double_value);
+                    RCLCPP_INFO(this->get_logger(), "Exposure changed to %f: %s", changed_parameter.value.double_value, success ? "SUCCESS" : "FAILED");
                 }
             }
         }
