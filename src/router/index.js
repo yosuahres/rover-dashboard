@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import MainView from '../views/MainView.vue';
 import CameraView from '../views/CamView.vue';
 import DebugView from '../views/DebugView.vue';
-import ScienceView from '../views/ScienceView.vue';
+import SlamView from '../views/SlamView.vue';
 import ConnectionView from '../views/ConnectionView.vue';
 
 const routes = [
@@ -26,14 +26,14 @@ const routes = [
     component: CameraView,
   },
   {
-    path: '/debug',
+    path: '/configuration',
     name: 'Debug',
     component: DebugView,
   },
   {
-    path: '/science',
+    path: '/slam',
     name: 'Science',
-    component: ScienceView,
+    component: SlamView,
   },
 ];
 

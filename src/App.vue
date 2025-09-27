@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen w-full flex flex-col bg-gray-100">
-    <!-- <nav class="bg-gray-100 p-4 flex items-center justify-between px-6"> -->
-    <nav v-if="isConnected" class="bg-gray-100 p-4 flex items-center justify-between px-6">
+    <nav class="bg-gray-100 p-4 flex items-center justify-between px-6">
+    <!-- <nav v-if="isConnected" class="bg-gray-100 p-4 flex items-center justify-between px-6"> -->
       <div class="flex flex-grow justify-evenly mr-8">
         <router-link
           to="/data"
@@ -20,29 +20,29 @@
           Camera
         </router-link>
         <router-link
-          to="/debug"
+          to="/configuration"
           class="text-lg font-medium text-gray-700 hover:text-purple-600 relative px-2 pb-1 router-link flex flex-col items-center w-full"
           active-class="font-bold text-purple-600 after:content-[''] after:block after:w-full after:h-1 after:bg-purple-600 after:rounded after:mt-1 after:transition-transform after:scale-x-100 after:origin-left"
           exact-active-class="font-bold text-purple-600 after:scale-x-100"
         >
-          Debug
+          Configuration
         </router-link>
         <router-link
-          to="/science"
+          to="/slam"
           class="text-lg font-medium text-gray-700 hover:text-purple-600 relative px-2 pb-1 router-link flex flex-col items-center w-full"
           active-class="font-bold text-purple-600 after:content-[''] after:block after:w-full after:h-1 after:bg-purple-600 after:rounded after:mt-1 after:transition-transform after:scale-x-100 after:origin-left"
           exact-active-class="font-bold text-purple-600 after:scale-x-100"
         >
-          Science
+          Slam
         </router-link>
-        <router-link
+        <!-- <router-link
           to="/xx"
           class="text-lg font-medium text-gray-700 hover:text-purple-600 relative px-2 pb-1 router-link flex flex-col items-center w-full"
           active-class="font-bold text-purple-600 after:content-[''] after:block after:w-full after:h-1 after:bg-purple-600 after:rounded after:mt-1 after:transition-transform after:scale-x-100 after:origin-left"
           exact-active-class="font-bold text-purple-600 after:scale-x-100"
         >
           XX
-        </router-link>
+        </router-link> -->
       </div>
       <button @click="disconnectRos" class="!bg-red-500 !hover:bg-red-600 text-white font-bold py-2 px-4 rounded">
         Disconnect
