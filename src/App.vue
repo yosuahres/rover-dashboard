@@ -57,10 +57,12 @@ import { onMounted, watch } from 'vue';
 import { useROS } from './composables/useRos';
 import { useMainStore } from './stores/store';
 import { useRouter } from 'vue-router';
+import { useJoystick } from './composables/useJoystick'; // Import the new composable
 
 const { isConnected, initializeROS, initializeRosTopics } = useROS();
 const mainStore = useMainStore();
 const router = useRouter();
+useJoystick(); // Initialize the joystick composable globally
 
 onMounted(() => {
   const storedIp = localStorage.getItem('ip');
