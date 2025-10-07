@@ -4,6 +4,7 @@ import CameraView from '../views/CamView.vue';
 import DebugView from '../views/DebugView.vue';
 import SlamView from '../views/SlamView.vue';
 import ConnectionView from '../views/ConnectionView.vue';
+import JoystickView from '../views/JoystickView.vue';
 
 const routes = [
   {
@@ -34,6 +35,11 @@ const routes = [
     path: '/slam',
     name: 'Science',
     component: SlamView,
+  },
+  {
+    path: '/joystick',
+    name: 'Joystick',
+    component: JoystickView,
   },
 ];
 

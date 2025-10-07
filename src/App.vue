@@ -35,14 +35,14 @@
         >
           Slam
         </router-link>
-        <!-- <router-link
-          to="/xx"
+        <router-link
+          to="/joystick"
           class="text-lg font-medium text-gray-700 hover:text-purple-600 relative px-2 pb-1 router-link flex flex-col items-center w-full"
           active-class="font-bold text-purple-600 after:content-[''] after:block after:w-full after:h-1 after:bg-purple-600 after:rounded after:mt-1 after:transition-transform after:scale-x-100 after:origin-left"
           exact-active-class="font-bold text-purple-600 after:scale-x-100"
         >
-          XX
-        </router-link> -->
+          Joystick
+        </router-link>
       </div>
       <button @click="disconnectRos" class="!bg-red-500 !hover:bg-red-600 text-white font-bold py-2 px-4 rounded">
         Disconnect
