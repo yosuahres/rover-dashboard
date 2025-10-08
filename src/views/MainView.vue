@@ -8,6 +8,9 @@
         <p class="text-xl" :class="{ 'text-green-600': mainStore.status === 'Connected', 'text-red-600': mainStore.status === 'Disconnected', 'text-gray-600': mainStore.status === null }">
           Status: {{ mainStore.status || 'Not Connected' }} - {{ mainStore.message }}
         </p>
+        <div class="mt-2">
+          <NetworkDisplay />
+        </div>
       </div>
       <!-- Robot Info -->
       <div class="flex-1 p-4 border rounded-lg shadow-md bg-white" id="robot-info-box">
@@ -68,6 +71,7 @@
 import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { useMainStore } from '../stores/store.js';
 import { useROS } from '../composables/useRos.js';
+import NetworkDisplay from '../components/NetworkDisplay.vue';
 const mainStore = useMainStore();
 const {
   initializeROS,
