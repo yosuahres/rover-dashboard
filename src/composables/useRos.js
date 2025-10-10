@@ -215,6 +215,46 @@ export function useROS() {
     });
   }
 
+  function ensureTestTopicPublisher() {
+    if (!mainStore.testTopicPublisher) {
+      if (!mainStore.ros) {
+        console.warn('ROS instance not ready.');
+        return null;
+      }
+      const testTopic = new ROSLIB.Topic({
+        ros: mainStore.ros,
+        name: '/test',
+        messageType: 'std_msgs/msg/Int32'
+      });
+      mainStore.setTestTopicPublisher(testTopic);
+    }
+    return mainStore.testTopicPublisher;
+  }
+
+  function publishTestValue(nextValue) {
+    if (!mainStore.ros || !mainStore.isConnected) {
+      console.warn('ROS not connected. Cannot publish test value.');
+      mainStore.setMessage('ROS not connected. Cannot publish test value.');
+      return;
+    }
+
+    const numericValue = Number(nextValue);
+    if (!Number.isFinite(numericValue)) {
+      console.warn('Invalid value provided for test topic publish:', nextValue);
+      return;
+    }
+
+    const publisher = ensureTestTopicPublisher();
+    if (!publisher) {
+      console.warn('Failed to initialize test topic publisher.');
+      return;
+    }
+
+    const intValue = Math.trunc(numericValue);
+    publisher.publish({ data: intValue });
+    mainStore.setMessage(`Published /test value: ${intValue}`);
+  }
+
   return {
     ros: readonly(rosRef), // Return the local reactive ref
     loading: readonly(mainStore.loading),
@@ -232,5 +272,6 @@ export function useROS() {
     unsubscribeFromTopic,
     setRosParameter, // Expose this function
     initializeRosTopics, // Expose this function
+    publishTestValue,
   };
 }

@@ -13,6 +13,8 @@ export const useMainStore = defineStore('main', {
     messages: new Map(), // Map<string, any> for topicName -> latestMessage
     subscriptions: new Map(), // Map<string, ROSLIB.Topic> for topicName -> subscriber
 
+    cameraTopics: {}, // Record<string, string> for camera cards
+
     // ROS Topic instances for DebugView
     topicConfiguration: null,
     topicVelocityAndSteering: null,
@@ -20,6 +22,7 @@ export const useMainStore = defineStore('main', {
     robotVelSubscriber: null,
     robotSteeringSubscriber: null,
     robotVelInfoSubscriber: null,
+    testTopicPublisher: null,
   }),
   getters: {
     isConnected: (state) => state.status === 'Connected',
@@ -37,6 +40,7 @@ export const useMainStore = defineStore('main', {
     setRobotVelSubscriber(subscriber) { this.robotVelSubscriber = subscriber; },
     setRobotSteeringSubscriber(subscriber) { this.robotSteeringSubscriber = subscriber; },
     setRobotVelInfoSubscriber(subscriber) { this.robotVelInfoSubscriber = subscriber; },
+    setTestTopicPublisher(publisher) { this.testTopicPublisher = publisher; },
     setStatus(newStatus) {
       this.status = newStatus;
     },
@@ -57,6 +61,13 @@ export const useMainStore = defineStore('main', {
     },
     addSubscription(topicName, subscriber) {
       this.subscriptions.set(topicName, subscriber);
+    },
+    setCameraTopic(cardId, topic) {
+      if (topic) {
+        this.cameraTopics[cardId] = topic;
+      } else {
+        delete this.cameraTopics[cardId];
+      }
     },
     removeSubscription(topicName) {
       if (this.subscriptions.has(topicName)) {
@@ -88,6 +99,13 @@ export const useMainStore = defineStore('main', {
       this.robotVelSubscriber = null;
       this.robotSteeringSubscriber = null;
       this.robotVelInfoSubscriber = null;
+
+      if (this.testTopicPublisher) {
+        if (typeof this.testTopicPublisher.unadvertise === 'function') {
+          this.testTopicPublisher.unadvertise();
+        }
+        this.testTopicPublisher = null;
+      }
     },
   },
 });
