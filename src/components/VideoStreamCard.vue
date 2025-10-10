@@ -27,16 +27,27 @@
     </div>
 
     <div :class="['flex-grow', 'relative', 'bg-gray-100', 'rounded-md', 'overflow-hidden', 'flex', 'items-center', 'justify-center', { 'h-full': !showInputForm }]">
-      <img v-if="videoStreamUrl" :src="videoStreamUrl" :alt="cardTitle + ' Video Stream'" class="w-full h-full object-contain" />
-      <p v-else class="p-4 text-gray-500 text-center">No video stream available or topic not set.</p>
+      <img
+        v-if="displayMode === 'image' && frameSrc"
+        :src="frameSrc"
+        :alt="cardTitle + ' Video Stream'"
+        class="max-w-full max-h-full object-contain"
+      />
+      <canvas
+        v-else-if="displayMode === 'canvas'"
+        ref="canvasEl"
+        class="max-w-full max-h-full"
+      />
+      <p v-else class="p-4 text-gray-500 text-center">
+        {{ frameError || 'No video stream available or topic not set.' }}
+      </p>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, defineProps, getCurrentInstance } from 'vue';
+import { ref, computed, defineProps, getCurrentInstance, watchEffect, nextTick } from 'vue';
 import { useMainStore } from '../stores/store.js';
-import { useROS } from '../composables/useRos.js'; 
 
 const props = defineProps({
   cardTitle: {
@@ -58,8 +69,32 @@ const emit = defineEmits(['card-selected']);
 const mainStore = useMainStore();
 const { uid: _uid } = getCurrentInstance(); // For unique IDs in template
 
-const currentTopic = ref('');
+const bytesToBase64 = (bytes) => {
+  if (!bytes?.length) {
+    return '';
+  }
+  const chunkSize = 0x8000;
+  let binary = '';
+  for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+    const chunk = bytes.slice(offset, offset + chunkSize);
+    binary += String.fromCharCode(...chunk);
+  }
+  return btoa(binary);
+};
+
+const currentTopic = computed({
+  get() {
+    return mainStore.cameraTopics[props.cardId] ?? '';
+  },
+  set(value) {
+    mainStore.setCameraTopic(props.cardId, value?.trim() ?? '');
+  },
+});
 const showInputForm = ref(true);
+const frameSrc = ref(null);
+const frameError = ref(null);
+const displayMode = ref('idle');
+const canvasEl = ref(null);
 
 const toggleInputForm = () => {
   showInputForm.value = !showInputForm.value;
@@ -69,10 +104,140 @@ const selectCard = () => {
   emit('card-selected', props.cardId);
 };
 
-const videoStreamUrl = computed(() => {
-  if (currentTopic.value && mainStore.server) {
-    return `http://${mainStore.server}:8080/stream?topic=${currentTopic.value}`;
+const base64ToUint8Array = (base64) => {
+  const binary = atob(base64);
+  const len = binary.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i += 1) {
+    bytes[i] = binary.charCodeAt(i);
   }
-  return null;
+  return bytes;
+};
+
+const drawRawImage = (message) => {
+  const canvas = canvasEl.value;
+  if (!canvas) {
+    frameError.value = 'Canvas belum siap.';
+    displayMode.value = 'error';
+    return;
+  }
+
+  const { width, height } = message;
+  if (!width || !height) {
+    frameError.value = 'Dimensi gambar tidak valid.';
+    displayMode.value = 'error';
+    return;
+  }
+
+  let dataArray;
+  if (typeof message.data === 'string') {
+    if (!message.data) {
+      frameError.value = 'Data gambar kosong.';
+      displayMode.value = 'error';
+      return;
+    }
+    dataArray = base64ToUint8Array(message.data);
+  } else if (Array.isArray(message.data)) {
+    dataArray = new Uint8Array(message.data);
+  } else {
+    frameError.value = 'Format data gambar tidak dikenal.';
+    displayMode.value = 'error';
+    return;
+  }
+
+  const encoding = (message.encoding || '').toLowerCase();
+  const expectedLength = message.step ? message.step * height : dataArray.length;
+  if (expectedLength && dataArray.length < expectedLength) {
+    frameError.value = 'Data gambar tidak lengkap.';
+    displayMode.value = 'error';
+    return;
+  }
+
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    frameError.value = 'Gagal mendapatkan konteks canvas.';
+    displayMode.value = 'error';
+    return;
+  }
+
+  canvas.width = width;
+  canvas.height = height;
+
+  const imageData = ctx.createImageData(width, height);
+  const dest = imageData.data;
+
+  if (encoding === 'rgb8') {
+    for (let i = 0, j = 0; i + 2 < dataArray.length && j + 3 < dest.length; i += 3, j += 4) {
+      dest[j] = dataArray[i];
+      dest[j + 1] = dataArray[i + 1];
+      dest[j + 2] = dataArray[i + 2];
+      dest[j + 3] = 255;
+    }
+  } else if (encoding === 'bgr8') {
+    for (let i = 0, j = 0; i + 2 < dataArray.length && j + 3 < dest.length; i += 3, j += 4) {
+      dest[j] = dataArray[i + 2];
+      dest[j + 1] = dataArray[i + 1];
+      dest[j + 2] = dataArray[i];
+      dest[j + 3] = 255;
+    }
+  } else if (encoding === 'mono8' || encoding === '8uc1') {
+    for (let i = 0, j = 0; i < dataArray.length && j + 3 < dest.length; i += 1, j += 4) {
+      const value = dataArray[i];
+      dest[j] = value;
+      dest[j + 1] = value;
+      dest[j + 2] = value;
+      dest[j + 3] = 255;
+    }
+  } else {
+    frameError.value = `Encoding ${message.encoding} belum didukung.`;
+    displayMode.value = 'error';
+    return;
+  }
+
+  ctx.putImageData(imageData, 0, 0);
+};
+
+watchEffect(() => {
+  frameError.value = null;
+  frameSrc.value = null;
+  displayMode.value = 'idle';
+
+  const topic = currentTopic.value;
+  if (!topic) {
+    return;
+  }
+
+  const topicType = mainStore.topics.get(topic);
+  const message = mainStore.messages.get(topic);
+
+  if (!topicType || !message) {
+    return;
+  }
+
+  if (topicType === 'sensor_msgs/msg/CompressedImage' || topicType === 'sensor_msgs/CompressedImage') {
+    const format = (message.format || 'jpeg').toLowerCase();
+    const mimeType = format.includes('png') ? 'image/png' : 'image/jpeg';
+
+    if (typeof message.data === 'string' && message.data.length > 0) {
+      frameSrc.value = `data:${mimeType};base64,${message.data}`;
+      displayMode.value = 'image';
+      return;
+    }
+    if (Array.isArray(message.data) && message.data.length > 0) {
+      frameSrc.value = `data:${mimeType};base64,${bytesToBase64(message.data)}`;
+      displayMode.value = 'image';
+      return;
+    }
+    frameError.value = 'Compressed image payload kosong.';
+    return;
+  }
+
+  if (topicType === 'sensor_msgs/msg/Image' || topicType === 'sensor_msgs/Image') {
+    displayMode.value = 'canvas';
+    nextTick(() => drawRawImage(message));
+    return;
+  }
+
+  frameError.value = `Encoding ${topicType} belum didukung.`;
 });
 </script>

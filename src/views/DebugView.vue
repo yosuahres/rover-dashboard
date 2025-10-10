@@ -32,6 +32,7 @@
               <button @click="onSaveConfiguration" class="px-4 py-2 !bg-green-500 text-white rounded-md !hover:bg-green-600">Apply</button>
               <button @click="onResetConfig" class="px-4 py-2 !bg-yellow-500 text-white rounded-md !hover:bg-yellow-600">Reset</button>
             </div>
+
           </div>
         </div>
       </div>
@@ -40,17 +41,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
 import { useMainStore } from '../stores/store';
 import { useROS } from '../composables/useRos';
 
 const mainStore = useMainStore();
-const { isConnected } = useROS(); 
+const { isConnected, publishTestValue, subscribeToTopic, unsubscribeFromTopic } = useROS(); 
 
 const robotVelocity = ref(0.0);
 const robotSteering = ref(0.0);
-const configurations = ref(Array(19).fill(0)); 
-
 const configurationNames = [
   // nama params
   "k_p_wheel",
@@ -71,8 +70,64 @@ const configurationNames = [
   "min_wheel_integral_pwm", 
   "wheel_base", 
   "tuning", 
-  "K_model"
+  "K_model",
+  "test"
 ];
+
+const configurations = ref(Array(configurationNames.length).fill(0));
+const canPublishTestValue = computed(() => mainStore.status === 'Connected');
+const testTopicName = '/test';
+const testTopicType = 'std_msgs/msg/Int32';
+const testTopicIndex = configurationNames.indexOf('test');
+let lastPublishedTestValue = null;
+
+const currentTestMessage = computed(() => {
+  const message = mainStore.messages.get(testTopicName);
+  if (!message) return null;
+  if (typeof message === 'number') return message;
+  if (typeof message.data === 'number') return message.data;
+  if (message.data && typeof message.data.data === 'number') return message.data.data;
+  return null;
+});
+
+watch(currentTestMessage, (val) => {
+  if (typeof val === 'number' && testTopicIndex !== -1) {
+    lastPublishedTestValue = val;
+    if (configurations.value[testTopicIndex] !== val) {
+      configurations.value[testTopicIndex] = val;
+    }
+  }
+}, { immediate: true });
+
+if (testTopicIndex !== -1) {
+  watch(() => configurations.value[testTopicIndex], (val) => {
+    if (!Number.isFinite(val)) {
+      return;
+    }
+    if (!canPublishTestValue.value) {
+      return;
+    }
+    if (val === lastPublishedTestValue) {
+      return;
+    }
+    publishTestValue(val);
+    lastPublishedTestValue = val;
+  });
+}
+
+const ensureTestTopicSubscription = () => {
+  if (!mainStore.isConnected) {
+    return;
+  }
+  subscribeToTopic(testTopicName, testTopicType);
+  if (testTopicIndex !== -1) {
+    const currentValue = configurations.value[testTopicIndex];
+    if (Number.isFinite(currentValue)) {
+      publishTestValue(currentValue);
+      lastPublishedTestValue = currentValue;
+    }
+  }
+};
 
 // Functions for ROS communication
 const setupRosSubscribers = () => {
@@ -82,7 +137,19 @@ const setupRosSubscribers = () => {
   }
 
   mainStore.configListener.subscribe(msg => {
-    configurations.value = msg.data.slice(0, configurationNames.length);
+    const received = msg.data.slice(0, configurationNames.length);
+    while (received.length < configurationNames.length) {
+      received.push(0);
+    }
+
+    if (testTopicIndex !== -1) {
+      const incomingTestValue = received[testTopicIndex];
+      if (Number.isFinite(incomingTestValue)) {
+        lastPublishedTestValue = incomingTestValue;
+      }
+    }
+
+    configurations.value = received;
     console.log("Received configuration from ROS:", msg.data);
   });
 
@@ -160,8 +227,11 @@ onMounted(() => {
   watch(isConnected, (newVal) => {
     if (newVal) {
       setupRosSubscribers();
+      ensureTestTopicSubscription();
     } else {
       cleanupRosSubscribers();
+      unsubscribeFromTopic(testTopicName);
+      lastPublishedTestValue = null;
     }
   }, { immediate: true }); // Run immediately to check initial connection
 });
@@ -169,6 +239,6 @@ onMounted(() => {
 onUnmounted(() => {
   cleanupRosSubscribers();
   window.removeEventListener('keydown', handleKeyDown);
+  unsubscribeFromTopic(testTopicName);
 });
 </script>
-

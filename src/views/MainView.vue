@@ -137,8 +137,6 @@ onUnmounted(() => {
   if (updateInterval) {
     clearInterval(updateInterval);
   }
-  // Unsubscribe from all topics when component is unmounted
-  mainStore.topics.forEach((type, name) => unsubscribeFromTopic(name));
   cleanupRosSubscribers();
 });
 
